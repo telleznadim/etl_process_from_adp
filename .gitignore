@@ -1,0 +1,12 @@
+*.log
+tmp/
+files/
+.env
+__pycache__/
+logs/
+.ruff_cache
+test_01_args_get_data_from_adp_v2.py
+test_01_args_get_data_from_adp.py
+test.py
+adp_local_transformation_process.py
+99_local_files.py
