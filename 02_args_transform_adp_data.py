@@ -189,7 +189,7 @@ def main():
         for endpoint in endpoints:
             logger.info(F"Starting for endpoint {endpoint}")
             df = pd.read_parquet(
-                f"files/{region_name}_{endpoint}_{date_time.strftime('%m%d%y')}.parquet",
+                f"{base_path}/files/{region_name}_{endpoint}_{date_time.strftime('%m%d%y')}.parquet",
             )
             df_output = transform_and_schema_assign(region_name, endpoint, df, date_time)
             if endpoint == 'team_time_cards':
