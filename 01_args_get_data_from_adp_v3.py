@@ -27,12 +27,7 @@ base_path = os.path.dirname(script_path)
 
 config = dotenv_values(f"{base_path}/.env")
 
-print(f"{base_path}.env")
-print(config)
-exit()
-
 region_file_path = f"{base_path}/files/company_region_id.json"
-
 
 log_path = f"{base_path}/logs/"
 
