@@ -25,7 +25,11 @@ script_path = os.path.abspath(__file__)
 # Get the directory containing the current script
 base_path = os.path.dirname(script_path)
 
-config = dotenv_values(f".env")
+config = dotenv_values(f"{base_path}/.env")
+
+print(f"{base_path}.env")
+print(config)
+exit()
 
 region_file_path = f"{base_path}/files/company_region_id.json"
 
