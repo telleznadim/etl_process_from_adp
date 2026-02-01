@@ -117,7 +117,7 @@ def get_workers_list():
 
     # Save JSON to file with timestamp
     timestamp = datetime.now().strftime("%Y%m%d")
-    filename = f"files/workers_{timestamp}.json"
+    filename = f"{base_path}/files/workers_{timestamp}.json"
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -189,7 +189,7 @@ def fetch_all_workers(
 
     # Save JSON to file with timestamp
     # timestamp = datetime.now().strftime("%Y%m%d")
-    filename = f"files/{region}_workers_{date_time.strftime('%m%d%y')}.json"
+    filename = f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.json"
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(all_workers, f, indent=4)
@@ -210,7 +210,7 @@ def get_field(d, path, default=None):
 
 def read_json_file_workers():
     # Load JSON file
-    with open("files/workers_20250912.json", "r", encoding="utf-8") as f:
+    with open(f"{base_path}/files/workers_20250912.json", "r", encoding="utf-8") as f:
         workers_data = json.load(f)
 
     # Print top-level keys
@@ -281,8 +281,8 @@ def read_json_file_workers():
     # Convert to DataFrame
     df = pd.DataFrame(rows)
     print(df)
-    df.to_excel("files/workers.xlsx", index=False)
-    df.to_parquet("files/workers.parquet", index=False)
+    df.to_excel(f"{base_path}/files/workers.xlsx", index=False)
+    df.to_parquet(f"{base_path}/files/workers.parquet", index=False)
 
     # for worker in workers_data["workers"]:
     #     print(worker['associateOID'])
@@ -322,7 +322,7 @@ def read_workers_json_file(region, date_time):
     
     # Load JSON file
     with open(
-        f"files/{region}_workers_{date_time.strftime('%m%d%y')}.json",
+        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.json",
         "r",
         encoding="utf-8",
     ) as f:
@@ -441,10 +441,10 @@ def read_workers_json_file(region, date_time):
     df = add_dw_columns(df, date_time, "workers", region, "ADP")
     print(df)
     df.to_excel(
-        f"files/{region}_workers_{date_time.strftime('%m%d%y')}.xlsx", index=False
+        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.xlsx", index=False
     )
     df.to_parquet(
-        f"files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet", index=False
+        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet", index=False
     )
 
 
@@ -669,7 +669,7 @@ def get_team_time_cards(
         data = response.json()
         # Save JSON to file with timestamp
         filename = (
-            f"files/{region}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
+            f"{base_path}/files/{region}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
         )
 
         with open(filename, "w", encoding="utf-8") as f:
@@ -718,7 +718,7 @@ def get_worker_payment_list(region, date_time, aoid="G3Q0HZMV4ZYJYRN1"):
             cert=(CLIENT_CERT, CLIENT_KEY),  # mTLS
             verify=True,  # or path to ADP CA if provided
         )
-        filename = f"files/{region}_{aoid}_worker_payment_list_{date_time.strftime('%m%d%y')}.json"
+        filename = f"{base_path}/files/{region}_{aoid}_worker_payment_list_{date_time.strftime('%m%d%y')}.json"
 
         if response.status_code == 204:
             print(
@@ -755,7 +755,7 @@ def get_worker_payment_list(region, date_time, aoid="G3Q0HZMV4ZYJYRN1"):
 def read_worker_payment_list_json_file(region, date_time, aoid):
     # Load JSON file
     filename = (
-        f"files/{region}_{aoid}_worker_payment_list_{date_time.strftime('%m%d%y')}.json"
+        f"{base_path}/files/{region}_{aoid}_worker_payment_list_{date_time.strftime('%m%d%y')}.json"
     )
 
     # Handle missing file
@@ -880,7 +880,7 @@ def get_team_time_cards_top_skip(
 
     # Save JSON to file with timestamp
     timestamp = datetime.now().strftime("%Y%m%d")
-    filename = f"files/{aoid}_teamTimeCards_{timestamp}.json"
+    filename = f"{base_path}/files/{aoid}_teamTimeCards_{timestamp}.json"
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(all_workers, f, indent=4)
@@ -893,7 +893,7 @@ def get_team_time_cards_top_skip(
 def select_all_period_times(region, date_time, start_date="2025-08-15"):
     logger.info(f"Starting function")
     df_all_workers = pd.read_parquet(
-        f"files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet"
+        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet"
     )
     print(df_all_workers)
     all_team_time_cards_dfs = []
@@ -915,11 +915,11 @@ def select_all_period_times(region, date_time, start_date="2025-08-15"):
     final_df = pd.concat(all_team_time_cards_dfs, ignore_index=True)
     final_df = add_dw_columns(final_df, date_time, "team_time_cards", region, "ADP")
     final_df.to_excel(
-        f"files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.xlsx",
+        f"{base_path}/files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.xlsx",
         index=False,
     )
     final_df.to_parquet(
-        f"files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.parquet",
+        f"{base_path}/files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.parquet",
         index=False,
     )
 
@@ -935,7 +935,7 @@ def get_all_workers_payments_details(region, date_time):
     }
 
     df_all_workers_payments = pd.read_parquet(
-        f"files/{region}_pay_statements_{date_time.strftime('%m%d%y')}.parquet"
+        f"{base_path}/files/{region}_pay_statements_{date_time.strftime('%m%d%y')}.parquet"
     )
     print(df_all_workers_payments)
     print(df_all_workers_payments.columns)
@@ -988,7 +988,7 @@ def get_all_workers_payments_details(region, date_time):
 
     # ✅ Save all results into ONE JSON file
     output_path = (
-        f"files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
+        f"{base_path}/files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
     )
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_payment_details, f, ensure_ascii=False, indent=4)
@@ -1036,7 +1036,7 @@ def parse_earnings(earnings):
 
 def read_all_workers_payments_details_json_file(region, date_time):
     filename = (
-        f"files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
+        f"{base_path}/files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
     )
     # Load JSON file
     with open(filename, "r", encoding="utf-8") as f:
@@ -1093,11 +1093,11 @@ def read_all_workers_payments_details_json_file(region, date_time):
     df = add_dw_columns(df, date_time, "pay_statement_details", region, "ADP")
 
     df.to_parquet(
-        f"files/{region}_pay_statement_details_{date_time.strftime('%m%d%y')}.parquet",
+        f"{base_path}/files/{region}_pay_statement_details_{date_time.strftime('%m%d%y')}.parquet",
         index=False,
     )
     df.to_excel(
-        f"files/{region}_pay_statement_details_{date_time.strftime('%m%d%y')}.xlsx",
+        f"{base_path}/files/{region}_pay_statement_details_{date_time.strftime('%m%d%y')}.xlsx",
         index=False,
     )
     return df
@@ -1110,12 +1110,12 @@ def select_all_workers(region, date_time):
 
 def select_all_workers_payments_list(region, date_time):
     # df_workers_time_cards = pd.read_parquet(
-    #     f"files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.parquet"
+    #     f"{base_path}/files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.parquet"
     # )
     # workers_associate_oid = df_workers_time_cards["associateOID"].unique()
     
     df_all_workers = pd.read_parquet(
-        f"files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet"
+        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet"
     )
     workers_associate_oid = df_all_workers["associateOID"].unique()
     
@@ -1139,11 +1139,11 @@ def select_all_workers_payments_list(region, date_time):
         df_all_workers_payments, date_time, "pay_statements", region, "ADP"
     )
     df_all_workers_payments.to_parquet(
-        f"files/{region}_pay_statements_{date_time.strftime('%m%d%y')}.parquet",
+        f"{base_path}/files/{region}_pay_statements_{date_time.strftime('%m%d%y')}.parquet",
         index=False,
     )
     df_all_workers_payments.to_excel(
-        f"files/{region}_pay_statements_{date_time.strftime('%m%d%y')}.xlsx",
+        f"{base_path}/files/{region}_pay_statements_{date_time.strftime('%m%d%y')}.xlsx",
         index=False,
     )
 
