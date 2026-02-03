@@ -483,8 +483,6 @@ def main():
                     sql_table_stg_name = f"stg_{silver_sql_table_name}_{region_name}"
                     sql_key_columns = ['id','region_id']
                     logger.info(F"Starting Stage Table procedure {sql_table_stg_name}")
-                    df.to_excel("files/test/time_data.xlsx", index=False)
-                    print(df)
                     # insert_to_sql_row_by_row(df, sql_table_stg_name)
                     execute_stage_table_truncate_insert(region_name, sql_table_stg_name, df)
                     sql_merge_staging_into_silver_auto(
