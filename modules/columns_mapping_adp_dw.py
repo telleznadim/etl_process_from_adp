@@ -83,6 +83,123 @@ southeast_team_time_cards_columns_list = [
         "alias": "regsal_time_duration",
         "type": "str",
     },
+    # REGULAR
+    {
+        "name": "REGULAR_periodRateBaseMultiplier",
+        "alias": "regular_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGULAR_periodRateAmount",
+        "alias": "regular_period_rate_amount",
+        "type": "float",
+    },
+
+    # PTO
+    {
+        "name": "PTO_periodRateAmount",
+        "alias": "pto_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "PTO_periodRateBaseMultiplier",
+        "alias": "pto_period_rate_base_multiplier",
+        "type": "float",
+    },
+
+    # OVERTIME
+    {
+        "name": "OVERTIME_periodRateBaseMultiplier",
+        "alias": "overtime_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "OVERTIME_periodRateAmount",
+        "alias": "overtime_period_rate_amount",
+        "type": "float",
+    },
+    
+    # REGULAR
+    {
+        "name": "REGULAR_rateBaseMultiplier",
+        "alias": "regular_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGULAR_rateAmount",
+        "alias": "regular_rate_amount",
+        "type": "float",
+    },
+
+    # PTO
+    {
+        "name": "PTO_rateBaseMultiplier",
+        "alias": "pto_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "PTO_rateAmount",
+        "alias": "pto_rate_amount",
+        "type": "float",
+    },
+
+    # OVERTIME
+    {
+        "name": "OVERTIME_rateBaseMultiplier",
+        "alias": "overtime_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "OVERTIME_rateAmount",
+        "alias": "overtime_rate_amount",
+        "type": "float",
+    },
+    
+    {
+        "name": "BEREAV_periodRateBaseMultiplier",
+        "alias": "bereavement_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "BEREAV_periodRateAmount",
+        "alias": "bereavement_period_rate_amount",
+        "type": "float",
+    },
+
+    {
+        "name": "BEREAV_rateBaseMultiplier",
+        "alias": "bereavement_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "BEREAV_rateAmount",
+        "alias": "bereavement_rate_amount",
+        "type": "float",
+    },
+    
+    {
+        "name": "REGSAL_periodRateBaseMultiplier",
+        "alias": "regsal_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGSAL_periodRateAmount",
+        "alias": "regsal_period_rate_amount",
+        "type": "float",
+    },
+
+    {
+        "name": "REGSAL_rateBaseMultiplier",
+        "alias": "regsal_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGSAL_rateAmount",
+        "alias": "regsal_rate_amount",
+        "type": "float",
+    },
+    
+    
     {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
     {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
     {
@@ -1503,7 +1620,6 @@ southeast_pay_statement_details_columns = [
         {"name": "id", "alias": "id", "type": "str"},
     ]
 
-
 columns_mapping_dict = {
     "workers": {
         "key_columns": ["associateOID", "positionID", "supervisorWorkerID"],
@@ -1580,7 +1696,7 @@ columns_mapping_dict = {
         "additional_column_list": []
     },
     "team_time_cards": {
-        "key_columns": ["associateOID", "workerID", "entryDate"],
+        "key_columns": ["associateOID", "workerID", "entryDate", 'timePeriodStartDate', 'timePeriodEndDate'],
         
         "columns_list": { "Central": central_team_time_cards_columns_list,"Southeast": southeast_team_time_cards_columns_list},
         "additional_column_list": { "Central": central_team_time_cards_additional_columns_list,"Southeast": southeast_team_time_cards_additional_columns_list}

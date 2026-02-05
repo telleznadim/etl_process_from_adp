@@ -72,9 +72,9 @@ def duration_to_minutes(x):
         return np.nan
 
 def transform_team_time_cards(df):
-    
     # 1) Select all duration columns
     duration_cols = [col for col in df.columns if col.endswith('_duration')]
+    
     
     # 2) Function to convert ISO-8601 duration -> minutes
     for col in duration_cols:
@@ -116,6 +116,7 @@ def transform_and_schema_assign(region, endpoint_name, df, date_time):
     logger.debug("Step 0: Filtering columns from source DataFrame")
     
     
+    
     df = df[source_columns]  # Keep only the relevant columns
 
     print("Step 1: Renaming Dataframe using mapping")
@@ -141,6 +142,7 @@ def transform_and_schema_assign(region, endpoint_name, df, date_time):
     print("Duplicates removed:", removed)
     logger.debug(f"Duplicates removed: {removed}")
     
+
     if endpoint_name == 'team_time_cards':
         df = transform_team_time_cards(df)
         df = df[df["entry_date"].notna()]
@@ -167,8 +169,8 @@ regions_list = {
 endpoints = [
     "workers",
     "team_time_cards",
-    "pay_statements",
-    "pay_statement_details"
+    # "pay_statements",
+    # "pay_statement_details"
 ]
     
 

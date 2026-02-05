@@ -435,11 +435,11 @@ regions_list = {
 endpoints = [
     {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
     {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
-    {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"},
-    {
-        "endpoint_name": "pay_statement_details",
-        "sql_table_name": "evi_adp_pay_statement_details",
-    },
+    # {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"}, 
+    # {
+    #     "endpoint_name": "pay_statement_details",
+    #     "sql_table_name": "evi_adp_pay_statement_details",
+    # },
 ]
 
 def execute_stage_table_truncate_insert(region, sql_table_stg_name, df):

@@ -453,8 +453,18 @@ def parse_period_totals(period_totals):
     flat = {}
     for pt in period_totals:
         code = get_field(pt, ["payCode", "codeValue"], "UNKNOWN")
+        
+        # duration
         duration = get_field(pt, ["timeDuration"])
         flat[f"{code}_periodTimeDuration"] = duration
+        
+        # rate fields
+        base_multiplier = get_field(pt, ["rate", "baseMultiplierValue"])
+        amount_value = get_field(pt, ["rate", "amountValue"])
+
+        flat[f"{code}_periodRateBaseMultiplier"] = base_multiplier
+        flat[f"{code}_periodRateAmount"] = amount_value
+        
     return flat
 
 
@@ -514,13 +524,21 @@ def parse_daily_totals(daily_totals):
     for dt in daily_totals:
         entry_date = get_field(dt, ["entryDate"])
         code = get_field(dt, ["payCode", "codeValue"], "UNKNOWN")
+        # duration
         duration = get_field(dt, ["timeDuration"])
+        
+        # rate fields
+        base_multiplier = get_field(dt, ["rate", "baseMultiplierValue"])
+        amount_value = get_field(dt, ["rate", "amountValue"])
+        
 
         if entry_date not in daily_dict:
             daily_dict[entry_date] = {"entryDate": entry_date}
 
         # Example column: REGULAR_timeDuration
         daily_dict[entry_date][f"{code}_timeDuration"] = duration
+        daily_dict[entry_date][f"{code}_rateBaseMultiplier"] = base_multiplier
+        daily_dict[entry_date][f"{code}_rateAmount"] = amount_value
 
     # Return as list of dicts (so we can merge into main worker rows)
     return list(daily_dict.values())
@@ -1181,14 +1199,35 @@ def main():
         select_all_workers(region_name, date_time)
         
         # Step 2 Select Period times
-        # start_date = "2025-12-06"
+        # two_weeks_before = "2025-08-15"
         start_date = get_team_time_cards_max_start_date(region_id)
         two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
+        
+        # aoid = 'G3DQE7YYDMVA0VTW'
+        # filename = (
+        #     f"{base_path}/files/{region_name}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
+        # )
+        
+        #     # Load JSON file
+        # with open(
+        #     filename,
+        #     "r",
+        #     encoding="utf-8",
+        # ) as f:
+        #     json_team_time_cards = json.load(f)
 
+        # df_team_time_cards = extract_time_cards_from_json_by_day_from_file(
+        #                 json_team_time_cards
+        #             )
+        
+        # print(df_team_time_cards)
+        # print(df_team_time_cards.columns)
+        # df_team_time_cards.to_excel("files/test/df_team_time_cards.xlsx", index=False)
+        
         # # Step 3 Select Payments (5 last Payments)
-        select_all_workers_payments_list(region_name, date_time)
-        select_all_workers_payments_detail(region_name, date_time)
+        # select_all_workers_payments_list(region_name, date_time)
+        # select_all_workers_payments_detail(region_name, date_time)
 
 
 if __name__ == "__main__":
