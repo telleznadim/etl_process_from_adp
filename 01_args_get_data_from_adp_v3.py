@@ -350,6 +350,13 @@ def read_workers_json_file(region, date_time):
         familyName1 = get_field(w, ["person", "legalName", "familyName1"])
         middleName = get_field(w, ["person", "legalName", "middleName"])
         givenName = get_field(w, ["person", "legalName", "givenName"])
+        
+        # Work assignments (list → expand)
+        businessCommunicationEmails = get_field(w, ["businessCommunication", "emails"])
+        if businessCommunicationEmails:
+            workEmail =  businessCommunicationEmails[0].get("emailUri")
+        else:
+            workEmail = None
 
         # Work assignments (list → expand)
         assignments = w.get("workAssignments", [])
@@ -369,6 +376,7 @@ def read_workers_json_file(region, date_time):
                     "familyName": familyName1,
                     "middleName": middleName,
                     "givenName": givenName,
+                    'workEmail':workEmail,
                     "assignmentStatus": get_field(
                         wa, ["assignmentStatus", "statusCode", "codeValue"]
                     ),
@@ -421,6 +429,7 @@ def read_workers_json_file(region, date_time):
                     "statusCode": statusCode,
                     "originalHireDate": originalHireDate,
                     "terminationDate": terminationDate,
+                    'workEmail':workEmail,
                     "assignmentStatus": None,
                     "assignmentStatusName": None,
                     "jobCode": None,

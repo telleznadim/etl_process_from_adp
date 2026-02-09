@@ -1681,8 +1681,7 @@ columns_mapping_dict = {
             {"name": "departmentShortName", "alias": "department_name", "type": "str"},
             {"name": "costNumberCodeValue", "alias": "cost_number_code", "type": "str"},
             {"name": "costNumberShortName", "alias": "cost_number_name", "type": "str"},
-            
-    
+            {"name": "workEmail", "alias": "work_email", "type": "str"},
             {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
             {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
             {
