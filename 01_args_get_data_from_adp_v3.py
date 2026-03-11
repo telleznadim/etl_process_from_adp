@@ -16,7 +16,9 @@ import pyarrow.parquet as pq
 import pyarrow as pa
 import time
 import re
-from modules.sql_calls.team_time_cards_max_start_date import get_team_time_cards_max_start_date
+from modules.sql_calls.team_time_cards_max_start_date import (
+    get_team_time_cards_max_start_date,
+)
 
 
 script_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -39,9 +41,9 @@ output_path = (
 )
 
 
-
 # logger
 logger = logging.getLogger(__name__)
+
 
 def setup_logging(log_file):
     logger = logging.getLogger()
@@ -55,7 +57,7 @@ def setup_logging(log_file):
         )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-    
+
         # Silence noisy libraries
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
@@ -137,7 +139,7 @@ def fetch_all_workers(
     Returns: list of worker dicts
     """
     logger.info(f"Starting function")
-    
+
     active_token = check_token_status(region.lower())
     CLIENT_CERT = config[f"{region.lower()}_adp_client_cert"]
     CLIENT_KEY = config[f"{region.lower()}_adp_client_key"]
@@ -300,6 +302,7 @@ def read_json_file_workers():
     #     print("Preview JSON structure:")
     #     print(json.dumps(workers_data, indent=2)[:1000])  # limit output
 
+
 def extract_org_unit(org_units, target_type):
     """
     Returns (code_value, short_name) for the given org unit type
@@ -317,9 +320,10 @@ def extract_org_unit(org_units, target_type):
 
     return None, None
 
+
 def read_workers_json_file(region, date_time):
     logger.info(f"Starting function")
-    
+
     # Load JSON file
     with open(
         f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.json",
@@ -333,7 +337,6 @@ def read_workers_json_file(region, date_time):
     # print("workers keys:", workers_data[0].keys())
     # print("workers keys:",
     #       workers_data[0]["workAssignments"][0].keys())
-
 
     workers = workers_data
 
@@ -350,11 +353,11 @@ def read_workers_json_file(region, date_time):
         familyName1 = get_field(w, ["person", "legalName", "familyName1"])
         middleName = get_field(w, ["person", "legalName", "middleName"])
         givenName = get_field(w, ["person", "legalName", "givenName"])
-        
+
         # Work assignments (list → expand)
         businessCommunicationEmails = get_field(w, ["businessCommunication", "emails"])
         if businessCommunicationEmails:
-            workEmail =  businessCommunicationEmails[0].get("emailUri")
+            workEmail = businessCommunicationEmails[0].get("emailUri")
         else:
             workEmail = None
 
@@ -376,7 +379,7 @@ def read_workers_json_file(region, date_time):
                     "familyName": familyName1,
                     "middleName": middleName,
                     "givenName": givenName,
-                    'workEmail':workEmail,
+                    "workEmail": workEmail,
                     "assignmentStatus": get_field(
                         wa, ["assignmentStatus", "statusCode", "codeValue"]
                     ),
@@ -412,12 +415,18 @@ def read_workers_json_file(region, date_time):
                     "payrollGroupCode": get_field(wa, ["payrollGroupCode"]),
                     "businessUnitCodeValue": bu_code,
                     "businessUnitShortName": bu_name,
-
                     "departmentCodeValue": dept_code,
                     "departmentShortName": dept_name,
-
                     "costNumberCodeValue": cost_code,
                     "costNumberShortName": cost_name,
+                    "hireDate": get_field(wa, ["hireDate"]),
+                    "actualStartDate": get_field(wa, ["actualStartDate"]),
+                    "hourlyRateAmount": get_field(
+                        wa, ["baseRemuneration", "hourlyRateAmount", "amountValue"]
+                    ),
+                    "annualRateAmount": get_field(
+                        wa, ["baseRemuneration", "annualRateAmount", "amountValue"]
+                    ),
                 }
                 rows.append(row)
         else:
@@ -429,7 +438,7 @@ def read_workers_json_file(region, date_time):
                     "statusCode": statusCode,
                     "originalHireDate": originalHireDate,
                     "terminationDate": terminationDate,
-                    'workEmail':workEmail,
+                    "workEmail": workEmail,
                     "assignmentStatus": None,
                     "assignmentStatusName": None,
                     "jobCode": None,
@@ -450,10 +459,12 @@ def read_workers_json_file(region, date_time):
     df = add_dw_columns(df, date_time, "workers", region, "ADP")
     print(df)
     df.to_excel(
-        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.xlsx", index=False
+        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.xlsx",
+        index=False,
     )
     df.to_parquet(
-        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet", index=False
+        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet",
+        index=False,
     )
 
 
@@ -462,18 +473,18 @@ def parse_period_totals(period_totals):
     flat = {}
     for pt in period_totals:
         code = get_field(pt, ["payCode", "codeValue"], "UNKNOWN")
-        
+
         # duration
         duration = get_field(pt, ["timeDuration"])
         flat[f"{code}_periodTimeDuration"] = duration
-        
+
         # rate fields
         base_multiplier = get_field(pt, ["rate", "baseMultiplierValue"])
         amount_value = get_field(pt, ["rate", "amountValue"])
 
         flat[f"{code}_periodRateBaseMultiplier"] = base_multiplier
         flat[f"{code}_periodRateAmount"] = amount_value
-        
+
     return flat
 
 
@@ -535,11 +546,10 @@ def parse_daily_totals(daily_totals):
         code = get_field(dt, ["payCode", "codeValue"], "UNKNOWN")
         # duration
         duration = get_field(dt, ["timeDuration"])
-        
+
         # rate fields
         base_multiplier = get_field(dt, ["rate", "baseMultiplierValue"])
         amount_value = get_field(dt, ["rate", "amountValue"])
-        
 
         if entry_date not in daily_dict:
             daily_dict[entry_date] = {"entryDate": entry_date}
@@ -695,9 +705,7 @@ def get_team_time_cards(
         response.raise_for_status()
         data = response.json()
         # Save JSON to file with timestamp
-        filename = (
-            f"{base_path}/files/{region}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
-        )
+        filename = f"{base_path}/files/{region}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
 
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
@@ -708,6 +716,83 @@ def get_team_time_cards(
     except requests.exceptions.HTTPError as e:
         print("Status code:", response.status_code)
         print("Response body:", response.text)  # API error details
+        return []
+
+
+def get_team_time_cards_v2(
+    region, date_time, aoid="G3VV32149FAZE2C0", start_date="2025-07-01"
+):
+    active_token = check_token_status(region.lower())
+    CLIENT_CERT = config[f"{region.lower()}_adp_client_cert"]
+    CLIENT_KEY = config[f"{region.lower()}_adp_client_key"]
+
+    headers = {
+        "Authorization": f"Bearer {active_token['access_token']}",
+        "Accept": "application/json",
+    }
+
+    base_url = f"https://accounts.adp.com/time/v2/workers/{aoid}/team-time-cards?$expand=dayEntries&$filter=timeCards/timePeriod/startDate ge '{start_date}'"
+
+    url = base_url
+    all_timecards = []
+
+    try:
+        while url:
+            response = requests.get(
+                url,
+                headers=headers,
+                cert=(CLIENT_CERT, CLIENT_KEY),
+                verify=True,
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            # append results
+            if "teamTimeCards" in data:
+                all_timecards.extend(data["teamTimeCards"])
+
+            meta = data.get("meta", {})
+
+            # stop if complete
+            if meta.get("completeIndicator", True):
+                break
+
+            # follow next link
+            links = meta.get("links", [])
+
+            next_url = None
+            for link in links:
+                if "href" in link:
+                    next_url = link["href"]
+                    break
+
+            if next_url:
+                # ADP links are relative
+                url = "https://accounts.adp.com" + next_url
+            else:
+                # fallback safety
+                break
+
+        # build final dataset
+        final_data = {
+            "teamTimeCards": all_timecards,
+            "total_records": len(all_timecards),
+        }
+
+        filename = f"{base_path}/files/{region}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(final_data, f, indent=4)
+
+        print(f"📁 Time Cards data exported to {filename}")
+        print(f"✅ Total timecards retrieved: {len(all_timecards)}")
+
+        return final_data
+
+    except requests.exceptions.HTTPError:
+        print("Status code:", response.status_code)
+        print("Response body:", response.text)
         return []
 
 
@@ -781,9 +866,7 @@ def get_worker_payment_list(region, date_time, aoid="G3Q0HZMV4ZYJYRN1"):
 
 def read_worker_payment_list_json_file(region, date_time, aoid):
     # Load JSON file
-    filename = (
-        f"{base_path}/files/{region}_{aoid}_worker_payment_list_{date_time.strftime('%m%d%y')}.json"
-    )
+    filename = f"{base_path}/files/{region}_{aoid}_worker_payment_list_{date_time.strftime('%m%d%y')}.json"
 
     # Handle missing file
     if not os.path.exists(filename):
@@ -928,7 +1011,7 @@ def select_all_period_times(region, date_time, start_date="2025-08-15"):
         # for supervisorAssociateOID in ["G3CK8PRN7AMFCPDN"]:
         if supervisorAssociateOID != None:
             print(supervisorAssociateOID)
-            json_team_time_cards = get_team_time_cards(
+            json_team_time_cards = get_team_time_cards_v2(
                 region, date_time, supervisorAssociateOID, start_date
             )
             if json_team_time_cards != []:
@@ -979,7 +1062,6 @@ def get_all_workers_payments_details(region, date_time):
         adp_url = f"https://accounts.adp.com"
         base_url = f"{adp_url}{pay_detail_uri}"
         print(base_url)
-        
 
         response = requests.get(
             base_url,
@@ -1014,9 +1096,7 @@ def get_all_workers_payments_details(region, date_time):
             print(f"Error {response.status_code} for {pay_detail_uri}")
 
     # ✅ Save all results into ONE JSON file
-    output_path = (
-        f"{base_path}/files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
-    )
+    output_path = f"{base_path}/files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_payment_details, f, ensure_ascii=False, indent=4)
 
@@ -1062,9 +1142,7 @@ def parse_earnings(earnings):
 
 
 def read_all_workers_payments_details_json_file(region, date_time):
-    filename = (
-        f"{base_path}/files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
-    )
+    filename = f"{base_path}/files/{region}_all_worker_payment_details_{date_time.strftime('%m%d%y')}.json"
     # Load JSON file
     with open(filename, "r", encoding="utf-8") as f:
         payment_details_data = json.load(f)
@@ -1140,13 +1218,12 @@ def select_all_workers_payments_list(region, date_time):
     #     f"{base_path}/files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.parquet"
     # )
     # workers_associate_oid = df_workers_time_cards["associateOID"].unique()
-    
+
     df_all_workers = pd.read_parquet(
         f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet"
     )
     workers_associate_oid = df_all_workers["associateOID"].unique()
-    
-    
+
     # workers_associate_oid = ['G33DNYRPPMZ5BAE0']
     all_dfs_workers_payments_list = []
     for aoid in workers_associate_oid:
@@ -1180,44 +1257,39 @@ def select_all_workers_payments_detail(region, date_time):
     read_all_workers_payments_details_json_file(region, date_time)
 
 
-regions_list = {
-    "Southeast": 1,
-    "Central":7
-}
-
-
+regions_list = {"Southeast": 1, "Central": 7}
 
 
 def main():
     date_time = datetime.now()
     # date_time = datetime.now() - timedelta(days=2)
-    
+
     if len(sys.argv) == 2:
         region_name = sys.argv[1]
         print(sys.argv)
-    
+
         logger = setup_logging(f"{log_path}{region_name}_{script_name}.log")
         logger.info(f"-------- Executing {script_name} ---------")
         logger.info(f"Datetime = {date_time.strftime('%m-%d-%y %H:%M:%S')}")
-    
-    # for region in regions_list:
+
+        # for region in regions_list:
         print(region_name)
         region_id = regions_list[region_name]
         print(region_id)
         # Step 1 Select all Workers
         select_all_workers(region_name, date_time)
-        
+
         # Step 2 Select Period times
         # two_weeks_before = "2025-08-15"
         start_date = get_team_time_cards_max_start_date(region_id)
         two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
-        
+
         # aoid = 'G3DQE7YYDMVA0VTW'
         # filename = (
         #     f"{base_path}/files/{region_name}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
         # )
-        
+
         #     # Load JSON file
         # with open(
         #     filename,
@@ -1229,14 +1301,22 @@ def main():
         # df_team_time_cards = extract_time_cards_from_json_by_day_from_file(
         #                 json_team_time_cards
         #             )
-        
+
         # print(df_team_time_cards)
         # print(df_team_time_cards.columns)
         # df_team_time_cards.to_excel("files/test/df_team_time_cards.xlsx", index=False)
-        
+
         # # Step 3 Select Payments (5 last Payments)
         # select_all_workers_payments_list(region_name, date_time)
         # select_all_workers_payments_detail(region_name, date_time)
+    else:
+        print("Testing")
+        supervisorAssociateOID = "G3TGA1X4ETQ785KR"
+        start_date = "2026-01-15"
+        region = "Central"
+        json_team_time_cards = get_team_time_cards_v2(
+            region, date_time, supervisorAssociateOID, start_date
+        )
 
 
 if __name__ == "__main__":
