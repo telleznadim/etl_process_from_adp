@@ -1620,6 +1620,7 @@ southeast_pay_statement_details_columns = [
         {"name": "id", "alias": "id", "type": "str"},
     ]
 
+
 columns_mapping_dict = {
     "workers": {
         "key_columns": ["associateOID", "positionID", "supervisorWorkerID"],
@@ -1682,6 +1683,16 @@ columns_mapping_dict = {
             {"name": "costNumberCodeValue", "alias": "cost_number_code", "type": "str"},
             {"name": "costNumberShortName", "alias": "cost_number_name", "type": "str"},
             {"name": "workEmail", "alias": "work_email", "type": "str"},
+            
+            {"name": "hireDate", "alias": "hire_date", "type": "date"},
+            {"name": "actualStartDate", "alias": "actual_start_date", "type": "date"},
+            {"name": "hourlyRateAmount", "alias": "hourly_rate_amount", "type": "float"},
+            {"name": "annualRateAmount", "alias": "annual_rate_amount", "type": "float"},
+            {"name": "payPeriodRateAmount", "alias": "pay_period_rate_amount", "type": "float"},
+            {"name": "payRateCode", "alias": "pay_rate_code", "type": "str"},
+            {"name": "supervisorFormattedName", "alias": "supervisor_formatted_name", "type": "str"},
+            {"name": "supervisorPositionID", "alias": "supervisor_position_id", "type": "str"},
+            
             {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
             {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
             {

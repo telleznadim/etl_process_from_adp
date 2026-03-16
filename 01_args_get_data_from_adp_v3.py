@@ -402,6 +402,23 @@ def read_workers_json_file(region, date_time):
                             "idValue",
                         ],
                     ),
+                    "supervisorFormattedName": get_field(
+                        wa,
+                        [
+                            "workerTimeProfile",
+                            "timeServiceSupervisor",
+                            "reportsToWorkerName",
+                            "formattedName",
+                        ],
+                    ),
+                    "supervisorPositionID": get_field(
+                        wa,
+                        [
+                            "workerTimeProfile",
+                            "timeServiceSupervisor",
+                            "positionID",
+                        ],
+                    ),
                     "workerTypeCode": get_field(wa, ["workerTypeCode", "shortName"]),
                     "homeWorkLocation": get_field(
                         wa, ["homeWorkLocation", "nameCode", "codeValue"]
@@ -427,6 +444,47 @@ def read_workers_json_file(region, date_time):
                     "annualRateAmount": get_field(
                         wa, ["baseRemuneration", "annualRateAmount", "amountValue"]
                     ),
+                    "payPeriodRateAmount": get_field(
+                        wa, ["baseRemuneration", "payPeriodRateAmount", "amountValue"]
+                    ),
+                    "payRateCode": (
+                        get_field(
+                            wa,
+                            [
+                                "baseRemuneration",
+                                "payPeriodRateAmount",
+                                "nameCode",
+                                "shortName",
+                            ],
+                        )
+                        or get_field(
+                            wa,
+                            [
+                                "baseRemuneration",
+                                "hourlyRateAmount",
+                                "nameCode",
+                                "shortName",
+                            ],
+                        )
+                    ),
+                    # "payPeriodRateCode": get_field(
+                    #     wa,
+                    #     [
+                    #         "baseRemuneration",
+                    #         "payPeriodRateAmount",
+                    #         "nameCode",
+                    #         "shortName",
+                    #     ],
+                    # ),
+                    # "hourlyRateCode": get_field(
+                    #     wa,
+                    #     [
+                    #         "baseRemuneration",
+                    #         "hourlyRateAmount",
+                    #         "nameCode",
+                    #         "shortName",
+                    #     ],
+                    # ),
                 }
                 rows.append(row)
         else:
@@ -1311,12 +1369,15 @@ def main():
         # select_all_workers_payments_detail(region_name, date_time)
     else:
         print("Testing")
-        supervisorAssociateOID = "G3TGA1X4ETQ785KR"
-        start_date = "2026-01-15"
-        region = "Central"
-        json_team_time_cards = get_team_time_cards_v2(
-            region, date_time, supervisorAssociateOID, start_date
-        )
+        region = "Southeast"
+        # fetch_all_workers(region, date_time)
+        read_workers_json_file(region, date_time)
+
+    # supervisorAssociateOID = "G38SZJG1SNT1VQP1"
+    # start_date = "2026-01-01"
+    # json_team_time_cards = get_team_time_cards_v2(
+    #     region, date_time, supervisorAssociateOID, start_date
+    # )
 
 
 if __name__ == "__main__":
