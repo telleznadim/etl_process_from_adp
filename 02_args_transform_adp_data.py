@@ -48,6 +48,7 @@ from_datalake_path = (
 # logger
 logger = logging.getLogger(__name__)
 
+
 def setup_logging(log_file):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -63,6 +64,7 @@ def setup_logging(log_file):
 
     return logger
 
+
 def duration_to_minutes(x):
     if pd.isna(x) or x in ["None", None]:
         return np.nan
@@ -71,24 +73,25 @@ def duration_to_minutes(x):
     except:
         return np.nan
 
+
 def transform_team_time_cards(df):
     # 1) Select all duration columns
-    duration_cols = [col for col in df.columns if col.endswith('_duration')]
-    
-    
+    duration_cols = [col for col in df.columns if col.endswith("_duration")]
+
     # 2) Function to convert ISO-8601 duration -> minutes
     for col in duration_cols:
-        df[col + '_minutes'] = df[col].apply(duration_to_minutes)
-        
+        df[col + "_minutes"] = df[col].apply(duration_to_minutes)
 
-    return(df)
+    return df
+
 
 def transform_and_schema_assign(region, endpoint_name, df, date_time):
     columns = columns_mapping_dict[endpoint_name]["columns_list"]
-    if ((endpoint_name == 'pay_statement_details') | (endpoint_name == 'team_time_cards')):
+    if (endpoint_name == "pay_statement_details") | (
+        endpoint_name == "team_time_cards"
+    ):
         columns = columns[region]
-        
-        
+
     key_columns = columns_mapping_dict[endpoint_name]["key_columns"]
 
     key_columns.append("region")
@@ -99,24 +102,19 @@ def transform_and_schema_assign(region, endpoint_name, df, date_time):
 
     # Extract only the source column names
     source_columns = [col["name"] for col in columns]
-    
+
     # --- Ensure all expected columns exist ---
     missing_columns = [c for c in source_columns if c not in df.columns]
     if missing_columns:
         print("⚠️ Missing columns detected:", missing_columns)
-        logger.warning(
-            f"Missing columns detected: {', '.join(missing_columns)}"
-        )
-        
-        
+        logger.warning(f"Missing columns detected: {', '.join(missing_columns)}")
+
         for col in missing_columns:
             df[col] = None  # Create column with empty values
 
     print("Step 0: Filtering columns from source DataFrame")
     logger.debug("Step 0: Filtering columns from source DataFrame")
-    
-    
-    
+
     df = df[source_columns]  # Keep only the relevant columns
 
     print("Step 1: Renaming Dataframe using mapping")
@@ -141,15 +139,16 @@ def transform_and_schema_assign(region, endpoint_name, df, date_time):
     removed = len_df_before - len_df_after
     print("Duplicates removed:", removed)
     logger.debug(f"Duplicates removed: {removed}")
-    
 
-    if endpoint_name == 'team_time_cards':
+    if endpoint_name == "team_time_cards":
         df = transform_team_time_cards(df)
         df = df[df["entry_date"].notna()]
-    
+
     # df = df[df["time_period_start_date"] != '2025-10-11']
 
-    logger.debug(f"Exporting df result to: {region}_ADP_DataLake_{endpoint_name}_{date_time.strftime('%m%d%y')}")
+    logger.debug(
+        f"Exporting df result to: {region}_ADP_DataLake_{endpoint_name}_{date_time.strftime('%m%d%y')}"
+    )
 
     export_to_files(
         df,
@@ -158,57 +157,61 @@ def transform_and_schema_assign(region, endpoint_name, df, date_time):
         logger,
         [False, True, True],
     )
-    return(df)
+    return df
 
 
-regions_list = {
-    "Southeast": 1,
-    "Central":7
-}
+regions_list = {"Southeast": 1, "Central": 7}
 
 endpoints = [
     "workers",
     "team_time_cards",
     # "pay_statements",
-    # "pay_statement_details"
+    # "pay_statement_details",
 ]
-    
+
 
 def main():
     date_time = datetime.now()
     # date_time = datetime.now() - timedelta(days=1)
-    
+
     if len(sys.argv) == 2:
         region_name = sys.argv[1]
         print(sys.argv)
-    
+
         logger = setup_logging(f"{log_path}{region_name}_{script_name}.log")
         logger.info(f"-------- Executing {script_name} ---------")
         logger.info(f"Datetime = {date_time.strftime('%m-%d-%y %H:%M:%S')}")
 
-    # for region in regions_list:
-        logger.info(F"Starting for region {region_name}")
+        # for region in regions_list:
+        logger.info(f"Starting for region {region_name}")
         for endpoint in endpoints:
-            logger.info(F"Starting for endpoint {endpoint}")
+            logger.info(f"Starting for endpoint {endpoint}")
             df = pd.read_parquet(
                 f"{base_path}/files/{region_name}_{endpoint}_{date_time.strftime('%m%d%y')}.parquet",
             )
-            df_output = transform_and_schema_assign(region_name, endpoint, df, date_time)
-            if endpoint == 'team_time_cards':
-                logger.debug(f'min_start_date: {df_output["time_period_start_date"].min()}')
-                logger.debug(f'max_start_date: {df_output["time_period_start_date"].max()}')
-                logger.debug(f'max_start_date: {df_output["time_period_start_date"].unique()}')
-                print(f'min_start_date: {df_output["time_period_start_date"].min()}')
-                print(f'max_start_date: {df_output["time_period_start_date"].max()}')
-                print(f'max_start_date: {df_output["time_period_start_date"].unique()}')
-            elif endpoint == 'pay_statements':
-                logger.debug(f'min_pay_date: {df_output["pay_date"].min()}')
-                logger.debug(f'min_pay_date: {df_output["pay_date"].max()}')
-                logger.debug(f'unique_pay_date: {df_output["pay_date"].unique()}')
-                print(f'min_pay_date: {df_output["pay_date"].min()}')
-                print(f'min_pay_date: {df_output["pay_date"].max()}')
-                print(f'unique_pay_date: {df_output["pay_date"].unique()}')
-
+            df_output = transform_and_schema_assign(
+                region_name, endpoint, df, date_time
+            )
+            if endpoint == "team_time_cards":
+                logger.debug(
+                    f"min_start_date: {df_output['time_period_start_date'].min()}"
+                )
+                logger.debug(
+                    f"max_start_date: {df_output['time_period_start_date'].max()}"
+                )
+                logger.debug(
+                    f"max_start_date: {df_output['time_period_start_date'].unique()}"
+                )
+                print(f"min_start_date: {df_output['time_period_start_date'].min()}")
+                print(f"max_start_date: {df_output['time_period_start_date'].max()}")
+                print(f"max_start_date: {df_output['time_period_start_date'].unique()}")
+            elif endpoint == "pay_statements":
+                logger.debug(f"min_pay_date: {df_output['pay_date'].min()}")
+                logger.debug(f"min_pay_date: {df_output['pay_date'].max()}")
+                logger.debug(f"unique_pay_date: {df_output['pay_date'].unique()}")
+                print(f"min_pay_date: {df_output['pay_date'].min()}")
+                print(f"min_pay_date: {df_output['pay_date'].max()}")
+                print(f"unique_pay_date: {df_output['pay_date'].unique()}")
 
 
 if __name__ == "__main__":
@@ -219,5 +222,3 @@ if __name__ == "__main__":
     print(f"Duration: {(end - start) / 60} mins")
     logger.info(f"Duration: {end - start} secs")
     logger.info(f"Duration: {(end - start) / 60} mins")
-
-

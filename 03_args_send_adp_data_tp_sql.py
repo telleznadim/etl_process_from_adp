@@ -15,7 +15,6 @@ from collections import Counter
 import sys
 
 
-
 script_name = os.path.splitext(os.path.basename(__file__))[0]
 
 # Get the absolute path of the current script
@@ -41,6 +40,7 @@ from_datalake_path = (
 
 # logger
 logger = logging.getLogger(__name__)
+
 
 def setup_logging(log_file):
     logger = logging.getLogger()
@@ -128,8 +128,8 @@ def sql_insert_process(conn, df, table_name):
             print("else insert")
             cursor.close()
         return process_result
-    
-    
+
+
 def insert_process_v3(conn, df, table_name):
     try:
         print(f"Inserting {len(df):,} rows into {table_name}")
@@ -174,6 +174,7 @@ def insert_process_v3(conn, df, table_name):
         # send_email(f"Error Insert {company_short} {table_name}", str(e))
         raise
 
+
 def create_sql_connection():
     server = config["sql_server"]
     database = config["sql_database"]
@@ -189,18 +190,15 @@ def create_sql_connection():
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
     )
-    return(conn)
+    return conn
+
 
 def delete_records(table_name, region_id):
-    print(
-        f"Deleting records WHERE (region = {region_id})"
-    )
-    logger.debug(
-       f"Deleting records WHERE (region = {region_id})"
-    )
-    
+    print(f"Deleting records WHERE (region = {region_id})")
+    logger.debug(f"Deleting records WHERE (region = {region_id})")
+
     conn = create_sql_connection()
-    
+
     cursor = conn.cursor()
 
     cursor.execute(f"""
@@ -211,6 +209,7 @@ def delete_records(table_name, region_id):
     conn.commit()
     conn.close()
 
+
 def insert_to_sql_dw(df, table_name, action):
     conn = create_sql_connection()
 
@@ -218,19 +217,16 @@ def insert_to_sql_dw(df, table_name, action):
         logger.debug(f"Inserting data process for {table_name}")
         # result = sql_insert_process(conn, df, table_name)
         result = insert_process_v3(conn, df, table_name)
-        
+
+
 def insert_to_sql_row_by_row(df, table_name):
     conn = create_sql_connection()
     sql_insert_process(conn, df, table_name)
-        
-        
+
+
 def sql_procedure_truncate(table_name):
-    print(
-        f"Truncate stage table {table_name}"
-    )
-    logger.debug(
-        f"Truncate stage table {table_name}"
-    )
+    print(f"Truncate stage table {table_name}")
+    logger.debug(f"Truncate stage table {table_name}")
     conn = create_sql_connection()
 
     cursor = conn.cursor()
@@ -242,16 +238,16 @@ def sql_procedure_truncate(table_name):
     conn.commit()
     conn.close()
 
-def sql_procedure_insert(
-    df, table_name, company_short=""
-):
+
+def sql_procedure_insert(df, table_name, company_short=""):
     conn = create_sql_connection()
 
     result = insert_process_v3(conn, df, table_name)
 
     logger.debug(f"Inserting data process COMPLETED for {table_name}")
     conn.close()
-    
+
+
 def get_table_columns(conn, table_name):
     sql = """
     SELECT c.name
@@ -263,15 +259,12 @@ def get_table_columns(conn, table_name):
     """
     cur = conn.cursor()
     cur.execute(sql, table_name)
-    return {row[0] for row in cur.fetchall()}    
+    return {row[0] for row in cur.fetchall()}
 
-def sql_merge_staging_into_silver_auto(
-    silver_table,
-    staging_table,
-    join_keys
-):
-    logger.debug(F"Starting merge stating to silver")
-    
+
+def sql_merge_staging_into_silver_auto(silver_table, staging_table, join_keys):
+    logger.debug(f"Starting merge stating to silver")
+
     conn = create_sql_connection()
 
     silver_cols = get_table_columns(conn, silver_table)
@@ -288,13 +281,9 @@ def sql_merge_staging_into_silver_auto(
         logger.debug("No updatable columns found!")
         raise Exception("No updatable columns found!")
 
-    on_clause = " AND ".join(
-        [f"t.{k} = s.{k}" for k in join_keys]
-    )
+    on_clause = " AND ".join([f"t.{k} = s.{k}" for k in join_keys])
 
-    update_clause = ",\n".join(
-        [f"t.{c} = s.{c}" for c in update_cols]
-    )
+    update_clause = ",\n".join([f"t.{c} = s.{c}" for c in update_cols])
 
     insert_cols = ", ".join(common_cols)
     insert_vals = ", ".join([f"s.{c}" for c in common_cols])
@@ -311,7 +300,7 @@ def sql_merge_staging_into_silver_auto(
         VALUES ({insert_vals})
         OUTPUT $action;
     """
-    
+
     print("---- GENERATED MERGE SQL ----")
     print(sql)
     print("-----------------------------")
@@ -324,8 +313,8 @@ def sql_merge_staging_into_silver_auto(
     actions = cur.fetchall()
     conn.commit()
     conn.close()
-    
-        # Count results
+
+    # Count results
     stats = Counter(row[0] for row in actions)
 
     print("MERGE results:")
@@ -340,15 +329,17 @@ def sql_merge_staging_into_silver_auto(
 
 
 def prepare_df_from_parquet(df, endpoint_name, region):
-    logger.info(F"Starting function")
+    logger.info(f"Starting function")
     schema = columns_mapping_dict[endpoint_name]
     columns_list = schema["columns_list"]
     additional_columns_list = schema["additional_column_list"]
-    if ((endpoint_name == 'pay_statement_details') | (endpoint_name == 'team_time_cards')):
+    if (endpoint_name == "pay_statement_details") | (
+        endpoint_name == "team_time_cards"
+    ):
         columns_list = columns_list[region]
         additional_columns_list = additional_columns_list[region]
-    logger.debug(F"Casting fromat based on the schema")
-    for col_def in (columns_list + additional_columns_list):
+    logger.debug(f"Casting fromat based on the schema")
+    for col_def in columns_list + additional_columns_list:
         col = col_def["alias"]
         col_type = col_def["type"]
 
@@ -377,19 +368,20 @@ def prepare_df_from_parquet(df, endpoint_name, region):
             df[col] = df[col].apply(lambda x: int(x) if pd.notnull(x) else 0)
         elif col_type == "bool":
             df[col] = df[col].where(pd.notnull(df[col]), False)
-            df[col] = df[col].astype(bool)           
+            df[col] = df[col].astype(bool)
         else:  # treat as string
             df[col] = df[col].astype(object)
             df[col] = df[col].where(pd.notnull(df[col]), None)
-            
+
     # df = df.where(pd.notnull(df), None)
 
     return df
 
+
 def prepare_df_from_parquet_v2(df, endpoint_name):
     schema = columns_mapping_dict[endpoint_name]
 
-    for col_def in (schema["columns_list"] + schema["additional_column_list"]):
+    for col_def in schema["columns_list"] + schema["additional_column_list"]:
         col = col_def["alias"]
         col_type = col_def["type"]
 
@@ -414,8 +406,10 @@ def prepare_df_from_parquet_v2(df, endpoint_name):
         # BOOL → BIT
         elif col_type == "bool":
             df[col] = df[col].map(
-                lambda x: 1 if x in [True, "true", "True", 1]
-                else 0 if x in [False, "false", "False", 0]
+                lambda x: 1
+                if x in [True, "true", "True", 1]
+                else 0
+                if x in [False, "false", "False", 0]
                 else None
             )
 
@@ -427,30 +421,29 @@ def prepare_df_from_parquet_v2(df, endpoint_name):
     return df
 
 
-regions_list = {
-    "Southeast": 1,
-    "Central":7
-}
+regions_list = {"Southeast": 1, "Central": 7}
 
 endpoints = [
     {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
     {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
-    # {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"}, 
+    # {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"},
     # {
     #     "endpoint_name": "pay_statement_details",
     #     "sql_table_name": "evi_adp_pay_statement_details",
     # },
 ]
 
+
 def execute_stage_table_truncate_insert(region, sql_table_stg_name, df):
     sql_procedure_truncate(sql_table_stg_name)
     sql_procedure_insert(df, sql_table_stg_name, region)
-    
+
 
 def clean_numeric(val):
     if val in ("", None, "None", "nan", "NaN"):
         return None
     return val
+
 
 def main():
     date_time = datetime.now()
@@ -458,41 +451,47 @@ def main():
     if len(sys.argv) == 2:
         region_name = sys.argv[1]
         print(sys.argv)
-    
+
         logger = setup_logging(f"{log_path}{region_name}_{script_name}.log")
         logger.debug(f"-------- Executing {script_name} ---------")
         logger.debug(f"Datetime = {date_time.strftime('%m-%d-%y %H:%M:%S')}")
 
-    # for region in regions_list:
+        # for region in regions_list:
         region_id = regions_list[region_name]
-        logger.info(F"Starting for region {region_name}, region_id: {region_id}")
-        print(f'{region_name}, region_id: {region_id}')
-        
+        logger.info(f"Starting for region {region_name}, region_id: {region_id}")
+        print(f"{region_name}, region_id: {region_id}")
+
         for endpoint_data in endpoints:
             endpoint_name = endpoint_data["endpoint_name"]
             sql_table = endpoint_data["sql_table_name"]
-            logger.info(F"Starting for endpoint {endpoint_name}, sql_table: {sql_table}")
-            
-            df = read_sf_parquet_data_from_datalake(region_name, endpoint_name, date_time)
+            logger.info(
+                f"Starting for endpoint {endpoint_name}, sql_table: {sql_table}"
+            )
+
+            df = read_sf_parquet_data_from_datalake(
+                region_name, endpoint_name, date_time
+            )
             if df is not None:
                 df = prepare_df_from_parquet(df, endpoint_name, region_name)
                 # df = prepare_df_from_parquet_v2(df, endpoint_name)
-                
+
                 if endpoint_name in stg_endpoints_list:
                     silver_sql_table_name = sql_table
                     sql_table_stg_name = f"stg_{silver_sql_table_name}_{region_name}"
-                    sql_key_columns = ['id','region_id']
-                    logger.info(F"Starting Stage Table procedure {sql_table_stg_name}")
+                    sql_key_columns = ["id", "region_id"]
+                    logger.info(f"Starting Stage Table procedure {sql_table_stg_name}")
                     # insert_to_sql_row_by_row(df, sql_table_stg_name)
-                    execute_stage_table_truncate_insert(region_name, sql_table_stg_name, df)
+                    execute_stage_table_truncate_insert(
+                        region_name, sql_table_stg_name, df
+                    )
                     sql_merge_staging_into_silver_auto(
-                        silver_sql_table_name,
-                        sql_table_stg_name,
-                        sql_key_columns
+                        silver_sql_table_name, sql_table_stg_name, sql_key_columns
                     )
                 else:
                     print("Overwrite Entire Table")
-                    logger.info(F"Overwrite Entire Table {endpoint_name}, sql_table: {sql_table}")
+                    logger.info(
+                        f"Overwrite Entire Table {endpoint_name}, sql_table: {sql_table}"
+                    )
                     delete_records(sql_table, region_id)
                     insert_to_sql_dw(df, sql_table, "insert")
 
