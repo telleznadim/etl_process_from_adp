@@ -67,11 +67,11 @@ def setup_logging(log_file):
 
 def duration_to_minutes(x):
     if pd.isna(x) or x in ["None", None]:
-        return np.nan
+        return 0
     try:
         return isodate.parse_duration(x).total_seconds() / 60
     except:
-        return np.nan
+        return 0
 
 
 def transform_team_time_cards(df):

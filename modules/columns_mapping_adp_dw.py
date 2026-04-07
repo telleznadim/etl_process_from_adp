@@ -460,6 +460,38 @@ central_team_time_cards_columns_list = [
         "alias": "sick_rate_amount",
         "type": "float",
     },
+    # OFC
+    {
+        "name": "OFC_periodTimeDuration",
+        "alias": "ofc_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "OFC_timeDuration",
+        "alias": "ofc_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "OFC_periodRateBaseMultiplier",
+        "alias": "ofc_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "OFC_periodRateAmount",
+        "alias": "ofc_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "OFC_rateBaseMultiplier",
+        "alias": "ofc_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "OFC_rateAmount",
+        "alias": "ofc_rate_amount",
+        "type": "float",
+    },
+
     {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
     {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
     {

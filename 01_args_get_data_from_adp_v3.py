@@ -1318,7 +1318,7 @@ def select_all_workers_payments_detail(region, date_time):
 regions_list = {
                 "Southeast": 1, 
                 "Central": 7,
-                "Northeast":0
+                "Northeast":2
                 }
 
 
@@ -1342,7 +1342,7 @@ def main():
         select_all_workers(region_name, date_time)
 
         # Step 2 Select Period times
-        # two_weeks_before = "2025-12-27"
+        # two_weeks_before = "2026-03-22"
         start_date = get_team_time_cards_max_start_date(region_id)
         two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
