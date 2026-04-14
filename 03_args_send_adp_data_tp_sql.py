@@ -421,7 +421,7 @@ def prepare_df_from_parquet_v2(df, endpoint_name):
     return df
 
 
-regions_list = {"Southeast": 1, "Central": 7}
+regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2}
 
 endpoints = [
     {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},

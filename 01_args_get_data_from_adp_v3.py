@@ -201,6 +201,80 @@ def fetch_all_workers(
     return all_workers
 
 
+def fetch_worker_additional_payments(
+    region, date_time, cert=None, key=None, top=50, pause=0.1, max_pages=10000
+):
+    """
+    Fetch all workers using $top/$skip pagination.
+      - cert,key: paths to client cert and private key for mTLS, or None
+      - top: page size (ADP default is 50; synchronous calls return max 50)
+      - pause: small sleep between requests to be polite
+    Returns: list of worker dicts
+    """
+    logger.info("Starting function")
+
+    active_token = check_token_status(region.lower())
+    CLIENT_CERT = config[f"{region.lower()}_adp_client_cert"]
+    CLIENT_KEY = config[f"{region.lower()}_adp_client_key"]
+
+    headers = {
+        "Authorization": f"Bearer {active_token['access_token']}",
+        "Accept": "application/json",
+    }
+
+    # base_url = "https://accounts.adp.com/hr/v2/workers"
+    base_url = "https://accounts.adp.com/hr/worker-profile/v1/workers/G3K6SJTQEY3EP3FA/work-assignments/9201185031083_148/additional-remunerations"
+    all_workers = []
+    skip = 0
+    page = 0
+
+    while True:
+        url = f"{base_url}?$top={top}&$skip={skip}"
+        print(f"➡️ Fetching: {url}")
+
+        resp = requests.get(
+            url, headers=headers, cert=(CLIENT_CERT, CLIENT_KEY), verify=True
+        )
+
+        if resp.status_code == 200:
+            data = resp.json()
+            batch = data.get("workers") or []
+            if not batch:
+                print("⚠️ Empty workers array, stopping.")
+                break
+
+            all_workers.extend(batch)
+
+        elif resp.status_code == 204:
+            print("✅ No content (204) – reached the end of records.")
+            break
+
+        else:
+            print(f"❌ Unexpected status {resp.status_code}: {resp.text}")
+            break  # stop loop on error
+
+        page += 1
+        skip += top
+
+        if page >= max_pages:
+            raise RuntimeError(
+                f"Reached max_pages ({max_pages}); stopping to avoid infinite loop."
+            )
+
+        time.sleep(pause)
+
+    # Save JSON to file with timestamp
+    # timestamp = datetime.now().strftime("%Y%m%d")
+    filename = f"{base_path}/files/{region}_additional_remunerations_{date_time.strftime('%m%d%y')}.json"
+
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(all_workers, f, indent=4)
+
+    print(f"📁 Workers data exported to {filename}")
+
+    return all_workers
+
+
 def get_field(d, path, default=None):
     """Traverse nested dict by path (list of keys)."""
     for key in path:
@@ -210,97 +284,81 @@ def get_field(d, path, default=None):
     return d
 
 
-def read_json_file_workers():
-    # Load JSON file
-    with open(f"{base_path}/files/workers_20250912.json", "r", encoding="utf-8") as f:
-        workers_data = json.load(f)
+# def read_json_file_workers():
+#     # Load JSON file
+#     with open(f"{base_path}/files/workers_20250912.json", "r", encoding="utf-8") as f:
+#         workers_data = json.load(f)
 
-    # Print top-level keys
-    # print("Top-level keys:", workers_data.keys())
-    # print("workers keys:", workers_data["workers"][0].keys())
-    # print("workers keys:",
-    #       workers_data["workers"][0]["workAssignments"][0].keys())
-    # exit()
+#     # Print top-level keys
+#     # print("Top-level keys:", workers_data.keys())
+#     # print("workers keys:", workers_data["workers"][0].keys())
+#     # print("workers keys:",
+#     #       workers_data["workers"][0]["workAssignments"][0].keys())
+#     # exit()
 
-    workers = workers_data["workers"]
+#     workers = workers_data["workers"]
 
-    # Flatten into list of rows
-    rows = []
-    for w in workers:
-        # Worker-level fields
-        associateOID = w.get("associateOID")
-        workerID = get_field(w, ["workerID", "idValue"])
-        statusCode = get_field(w, ["workerStatus", "statusCode", "codeValue"])
-        originalHireDate = get_field(w, ["workerDates", "originalHireDate"])
-        terminationDate = get_field(w, ["workerDates", "terminationDate"])
-        formattedName = get_field(w, ["person", "legalName", "formattedName"])
-        familyName1 = get_field(w, ["person", "legalName", "familyName1"])
-        middleName = get_field(w, ["person", "legalName", "middleName"])
-        givenName = get_field(w, ["person", "legalName", "givenName"])
+#     # Flatten into list of rows
+#     rows = []
+#     for w in workers:
+#         # Worker-level fields
+#         associateOID = w.get("associateOID")
+#         workerID = get_field(w, ["workerID", "idValue"])
+#         statusCode = get_field(w, ["workerStatus", "statusCode", "codeValue"])
+#         originalHireDate = get_field(w, ["workerDates", "originalHireDate"])
+#         terminationDate = get_field(w, ["workerDates", "terminationDate"])
+#         formattedName = get_field(w, ["person", "legalName", "formattedName"])
+#         familyName1 = get_field(w, ["person", "legalName", "familyName1"])
+#         middleName = get_field(w, ["person", "legalName", "middleName"])
+#         givenName = get_field(w, ["person", "legalName", "givenName"])
 
-        # Work assignments (list → expand)
-        assignments = w.get("workAssignments", [])
-        if assignments:
-            for wa in assignments:
-                row = {
-                    "associateOID": associateOID,
-                    "workerID": workerID,
-                    "statusCode": statusCode,
-                    "originalHireDate": originalHireDate,
-                    "terminationDate": terminationDate,
-                    "formattedName": formattedName,
-                    "familyName": familyName1,
-                    "middleName": middleName,
-                    "givenName": givenName,
-                    "assignmentStatus": get_field(
-                        wa, ["assignmentStatus", "statusCode", "codeValue"]
-                    ),
-                    "assignmentStatusName": get_field(
-                        wa, ["assignmentStatus", "statusCode", "longName"]
-                    ),
-                    "jobCode": get_field(wa, ["jobCode", "codeValue"]),
-                    "jobTitle": wa.get("jobTitle"),
-                    "positionID": wa.get("positionID"),
-                }
-                rows.append(row)
-        else:
-            # Worker with no assignments → still include row
-            rows.append(
-                {
-                    "associateOID": associateOID,
-                    "workerID": workerID,
-                    "statusCode": statusCode,
-                    "originalHireDate": originalHireDate,
-                    "terminationDate": terminationDate,
-                    "assignmentStatus": None,
-                    "assignmentStatusName": None,
-                    "jobCode": None,
-                    "jobTitle": None,
-                    "positionID": None,
-                }
-            )
+#         # Work assignments (list → expand)
+#         assignments = w.get("workAssignments", [])
+#         if assignments:
+#             for wa in assignments:
+#                 row = {
+#                     "associateOID": associateOID,
+#                     "workerID": workerID,
+#                     "statusCode": statusCode,
+#                     "originalHireDate": originalHireDate,
+#                     "terminationDate": terminationDate,
+#                     "formattedName": formattedName,
+#                     "familyName": familyName1,
+#                     "middleName": middleName,
+#                     "givenName": givenName,
+#                     "assignmentStatus": get_field(
+#                         wa, ["assignmentStatus", "statusCode", "codeValue"]
+#                     ),
+#                     "assignmentStatusName": get_field(
+#                         wa, ["assignmentStatus", "statusCode", "longName"]
+#                     ),
+#                     "jobCode": get_field(wa, ["jobCode", "codeValue"]),
+#                     "jobTitle": wa.get("jobTitle"),
+#                     "positionID": wa.get("positionID"),
+#                 }
+#                 rows.append(row)
+#         else:
+#             # Worker with no assignments → still include row
+#             rows.append(
+#                 {
+#                     "associateOID": associateOID,
+#                     "workerID": workerID,
+#                     "statusCode": statusCode,
+#                     "originalHireDate": originalHireDate,
+#                     "terminationDate": terminationDate,
+#                     "assignmentStatus": None,
+#                     "assignmentStatusName": None,
+#                     "jobCode": None,
+#                     "jobTitle": None,
+#                     "positionID": None,
+#                 }
+#             )
 
-    # Convert to DataFrame
-    df = pd.DataFrame(rows)
-    print(df)
-    df.to_excel(f"{base_path}/files/workers.xlsx", index=False)
-    df.to_parquet(f"{base_path}/files/workers.parquet", index=False)
-
-    # for worker in workers_data["workers"]:
-    #     print(worker['associateOID'])
-    #     print(len(worker["workAssignments"]))
-
-    # # If it's a dict with nested 'workers' or 'data'
-    # if "workers" in workers_data:
-    #     print(f"Number of workers: {len(workers_data['workers'])}")
-    #     print("First worker keys:", workers_data['workers'][0].keys())
-    # elif "data" in workers_data:
-    #     print(f"Number of items: {len(workers_data['data'])}")
-    #     print("First item keys:", workers_data['data'][0].keys())
-    # else:
-    #     # Just preview part of it
-    #     print("Preview JSON structure:")
-    #     print(json.dumps(workers_data, indent=2)[:1000])  # limit output
+#     # Convert to DataFrame
+#     df = pd.DataFrame(rows)
+#     print(df)
+#     df.to_excel(f"{base_path}/files/workers.xlsx", index=False)
+#     df.to_parquet(f"{base_path}/files/workers.parquet", index=False)
 
 
 def extract_org_unit(org_units, target_type):
@@ -322,7 +380,7 @@ def extract_org_unit(org_units, target_type):
 
 
 def read_workers_json_file(region, date_time):
-    logger.info(f"Starting function")
+    logger.info("Starting function")
 
     # Load JSON file
     with open(
@@ -380,12 +438,6 @@ def read_workers_json_file(region, date_time):
                     "middleName": middleName,
                     "givenName": givenName,
                     "workEmail": workEmail,
-                    "assignmentStatus": get_field(
-                        wa, ["assignmentStatus", "statusCode", "codeValue"]
-                    ),
-                    "assignmentStatusName": get_field(
-                        wa, ["assignmentStatus", "statusCode", "longName"]
-                    ),
                     "jobCode": get_field(wa, ["jobCode", "codeValue"]),
                     "jobTitle": wa.get("jobTitle"),
                     "positionID": wa.get("positionID"),
@@ -438,6 +490,16 @@ def read_workers_json_file(region, date_time):
                     "costNumberShortName": cost_name,
                     "hireDate": get_field(wa, ["hireDate"]),
                     "actualStartDate": get_field(wa, ["actualStartDate"]),
+                    "assignmentTerminationDate": get_field(wa, ["terminationDate"]),
+                    "assignmentStatus": get_field(
+                        wa, ["assignmentStatus", "statusCode", "codeValue"]
+                    ),
+                    "assignmentStatusName": get_field(
+                        wa, ["assignmentStatus", "statusCode", "longName"]
+                    ),
+                    "assignmentEffectiveDate": get_field(
+                        wa, ["assignmentStatus", "effectiveDate"]
+                    ),
                     "hourlyRateAmount": get_field(
                         wa, ["baseRemuneration", "hourlyRateAmount", "amountValue"]
                     ),
@@ -1315,11 +1377,7 @@ def select_all_workers_payments_detail(region, date_time):
     read_all_workers_payments_details_json_file(region, date_time)
 
 
-regions_list = {
-                "Southeast": 1, 
-                "Central": 7,
-                "Northeast":2
-                }
+regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2}
 
 
 def main():
@@ -1342,7 +1400,7 @@ def main():
         select_all_workers(region_name, date_time)
 
         # Step 2 Select Period times
-        # two_weeks_before = "2026-03-22"
+        # two_weeks_before = "2026-02-01"
         start_date = get_team_time_cards_max_start_date(region_id)
         two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
@@ -1375,7 +1433,8 @@ def main():
         print("Testing")
         region = "Southeast"
         # fetch_all_workers(region, date_time)
-        read_workers_json_file(region, date_time)
+        # read_workers_json_file(region, date_time)
+        fetch_worker_additional_payments(region, date_time)
 
     # supervisorAssociateOID = "G38SZJG1SNT1VQP1"
     # start_date = "2026-01-01"

@@ -160,7 +160,7 @@ def transform_and_schema_assign(region, endpoint_name, df, date_time):
     return df
 
 
-regions_list = {"Southeast": 1, "Central": 7}
+regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2}
 
 endpoints = [
     "workers",

@@ -491,7 +491,6 @@ central_team_time_cards_columns_list = [
         "alias": "ofc_rate_amount",
         "type": "float",
     },
-
     {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
     {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
     {
@@ -1855,6 +1854,16 @@ columns_mapping_dict = {
             {"name": "workEmail", "alias": "work_email", "type": "str"},
             {"name": "hireDate", "alias": "hire_date", "type": "date"},
             {"name": "actualStartDate", "alias": "actual_start_date", "type": "date"},
+            {
+                "name": "assignmentTerminationDate",
+                "alias": "assignment_termination_date",
+                "type": "date",
+            },
+            {
+                "name": "assignmentEffectiveDate",
+                "alias": "assignment_effective_date",
+                "type": "date",
+            },
             {
                 "name": "hourlyRateAmount",
                 "alias": "hourly_rate_amount",
