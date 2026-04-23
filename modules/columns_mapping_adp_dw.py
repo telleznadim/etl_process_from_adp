@@ -1,4 +1,5 @@
 southeast_team_time_cards_columns_list = [
+    # ===== METADATA FIELDS =====
     {"name": "associateOID", "alias": "associate_oid", "type": "str"},
     {"name": "workerID", "alias": "worker_id", "type": "str"},
     {"name": "formattedName", "alias": "formatted_name", "type": "str"},
@@ -26,64 +27,14 @@ southeast_team_time_cards_columns_list = [
         "type": "date",
     },
     {"name": "periodStatus", "alias": "period_status", "type": "str"},
+    {"name": "entryDate", "alias": "entry_date", "type": "date"},
+    
+    # ===== REGULAR =====
     {
         "name": "REGULAR_periodTimeDuration",
         "alias": "regular_period_time_duration",
         "type": "str",
     },
-    {
-        "name": "OVERTIME_periodTimeDuration",
-        "alias": "overtime_period_time_duration",
-        "type": "str",
-    },
-    {"name": "entryDate", "alias": "entry_date", "type": "date"},
-    {
-        "name": "REGULAR_timeDuration",
-        "alias": "regular_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "OVERTIME_timeDuration",
-        "alias": "overtime_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "HOLIDAY_periodTimeDuration",
-        "alias": "holiday_period_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "HOLIDAY_timeDuration",
-        "alias": "holiday_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "PTO_periodTimeDuration",
-        "alias": "pto_period_time_duration",
-        "type": "str",
-    },
-    {"name": "PTO_timeDuration", "alias": "pto_time_duration", "type": "str"},
-    {
-        "name": "BEREAV_periodTimeDuration",
-        "alias": "bereavement_period_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "BEREAV_timeDuration",
-        "alias": "bereavement_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "REGSAL_periodTimeDuration",
-        "alias": "regsal_period_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "REGSAL_timeDuration",
-        "alias": "regsal_time_duration",
-        "type": "str",
-    },
-    # REGULAR
     {
         "name": "REGULAR_periodRateBaseMultiplier",
         "alias": "regular_period_rate_base_multiplier",
@@ -94,29 +45,11 @@ southeast_team_time_cards_columns_list = [
         "alias": "regular_period_rate_amount",
         "type": "float",
     },
-    # PTO
     {
-        "name": "PTO_periodRateAmount",
-        "alias": "pto_period_rate_amount",
-        "type": "float",
+        "name": "REGULAR_timeDuration",
+        "alias": "regular_time_duration",
+        "type": "str",
     },
-    {
-        "name": "PTO_periodRateBaseMultiplier",
-        "alias": "pto_period_rate_base_multiplier",
-        "type": "float",
-    },
-    # OVERTIME
-    {
-        "name": "OVERTIME_periodRateBaseMultiplier",
-        "alias": "overtime_period_rate_base_multiplier",
-        "type": "float",
-    },
-    {
-        "name": "OVERTIME_periodRateAmount",
-        "alias": "overtime_period_rate_amount",
-        "type": "float",
-    },
-    # REGULAR
     {
         "name": "REGULAR_rateBaseMultiplier",
         "alias": "regular_rate_base_multiplier",
@@ -127,18 +60,28 @@ southeast_team_time_cards_columns_list = [
         "alias": "regular_rate_amount",
         "type": "float",
     },
-    # PTO
+    
+    # ===== OVERTIME =====
     {
-        "name": "PTO_rateBaseMultiplier",
-        "alias": "pto_rate_base_multiplier",
+        "name": "OVERTIME_periodTimeDuration",
+        "alias": "overtime_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "OVERTIME_periodRateBaseMultiplier",
+        "alias": "overtime_period_rate_base_multiplier",
         "type": "float",
     },
     {
-        "name": "PTO_rateAmount",
-        "alias": "pto_rate_amount",
+        "name": "OVERTIME_periodRateAmount",
+        "alias": "overtime_period_rate_amount",
         "type": "float",
     },
-    # OVERTIME
+    {
+        "name": "OVERTIME_timeDuration",
+        "alias": "overtime_time_duration",
+        "type": "str",
+    },
     {
         "name": "OVERTIME_rateBaseMultiplier",
         "alias": "overtime_rate_base_multiplier",
@@ -149,7 +92,58 @@ southeast_team_time_cards_columns_list = [
         "alias": "overtime_rate_amount",
         "type": "float",
     },
-    # BEREAV
+    
+    # ===== HOLIDAY =====
+    {
+        "name": "HOLIDAY_periodTimeDuration",
+        "alias": "holiday_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "HOLIDAY_timeDuration",
+        "alias": "holiday_time_duration",
+        "type": "str",
+    },
+    
+    # ===== PTO =====
+    {
+        "name": "PTO_periodTimeDuration",
+        "alias": "pto_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "PTO_periodRateAmount",
+        "alias": "pto_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "PTO_periodRateBaseMultiplier",
+        "alias": "pto_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {"name": "PTO_timeDuration", "alias": "pto_time_duration", "type": "str"},
+    {
+        "name": "PTO_rateBaseMultiplier",
+        "alias": "pto_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "PTO_rateAmount",
+        "alias": "pto_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== BEREAV (Bereavement) =====
+    {
+        "name": "BEREAV_periodTimeDuration",
+        "alias": "bereavement_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "BEREAV_timeDuration",
+        "alias": "bereavement_time_duration",
+        "type": "str",
+    },
     {
         "name": "BEREAV_periodRateBaseMultiplier",
         "alias": "bereavement_period_rate_base_multiplier",
@@ -169,6 +163,18 @@ southeast_team_time_cards_columns_list = [
         "name": "BEREAV_rateAmount",
         "alias": "bereavement_rate_amount",
         "type": "float",
+    },
+    
+    # ===== REGSAL =====
+    {
+        "name": "REGSAL_periodTimeDuration",
+        "alias": "regsal_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "REGSAL_timeDuration",
+        "alias": "regsal_time_duration",
+        "type": "str",
     },
     {
         "name": "REGSAL_periodRateBaseMultiplier",
@@ -190,6 +196,8 @@ southeast_team_time_cards_columns_list = [
         "alias": "regsal_rate_amount",
         "type": "float",
     },
+    
+    # ===== DATA WAREHOUSE FIELDS =====
     {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
     {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
     {
@@ -217,6 +225,7 @@ southeast_team_time_cards_additional_columns_list = [
 ]
 
 central_team_time_cards_columns_list = [
+    # ===== METADATA FIELDS =====
     {"name": "associateOID", "alias": "associate_oid", "type": "str"},
     {"name": "workerID", "alias": "worker_id", "type": "str"},
     {"name": "formattedName", "alias": "formatted_name", "type": "str"},
@@ -245,16 +254,40 @@ central_team_time_cards_columns_list = [
     },
     {"name": "periodStatus", "alias": "period_status", "type": "str"},
     {"name": "entryDate", "alias": "entry_date", "type": "date"},
+    
+    # ===== REGULAR =====
     {
         "name": "REGULAR_periodTimeDuration",
         "alias": "regular_period_time_duration",
         "type": "str",
     },
     {
+        "name": "REGULAR_periodRateBaseMultiplier",
+        "alias": "regular_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGULAR_periodRateAmount",
+        "alias": "regular_period_rate_amount",
+        "type": "float",
+    },
+    {
         "name": "REGULAR_timeDuration",
         "alias": "regular_time_duration",
         "type": "str",
     },
+    {
+        "name": "REGULAR_rateBaseMultiplier",
+        "alias": "regular_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGULAR_rateAmount",
+        "alias": "regular_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== SICK =====
     {
         "name": "SIC_periodTimeDuration",
         "alias": "sick_period_time_duration",
@@ -266,70 +299,32 @@ central_team_time_cards_columns_list = [
         "type": "str",
     },
     {
+        "name": "SIC_periodRateAmount",
+        "alias": "sick_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "SIC_periodRateBaseMultiplier",
+        "alias": "sick_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "SIC_rateBaseMultiplier",
+        "alias": "sick_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "SIC_rateAmount",
+        "alias": "sick_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== OVERTIME =====
+    {
         "name": "OVERTIME_periodTimeDuration",
         "alias": "overtime_period_time_duration",
         "type": "str",
     },
-    {
-        "name": "OVERTIME_timeDuration",
-        "alias": "overtime_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "VAC_periodTimeDuration",
-        "alias": "pto_period_time_duration",
-        "type": "str",
-    },
-    {"name": "VAC_timeDuration", "alias": "pto_time_duration", "type": "str"},
-    {
-        "name": "VACATION_periodTimeDuration",
-        "alias": "vacation_period_time_duration",
-        "type": "str",
-    },
-    {"name": "VACATION_timeDuration", "alias": "vacation_time_duration", "type": "str"},
-    {
-        "name": "BEREAV_periodTimeDuration",
-        "alias": "bereavement_period_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "BEREAV_timeDuration",
-        "alias": "bereavement_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "FLA_periodTimeDuration",
-        "alias": "fla_period_time_duration",
-        "type": "str",
-    },
-    {
-        "name": "FLA_timeDuration",
-        "alias": "fla_time_duration",
-        "type": "str",
-    },
-    # REGULAR
-    {
-        "name": "REGULAR_periodRateBaseMultiplier",
-        "alias": "regular_period_rate_base_multiplier",
-        "type": "float",
-    },
-    {
-        "name": "REGULAR_periodRateAmount",
-        "alias": "regular_period_rate_amount",
-        "type": "float",
-    },
-    # PTO
-    {
-        "name": "VAC_periodRateAmount",
-        "alias": "pto_period_rate_amount",
-        "type": "float",
-    },
-    {
-        "name": "VAC_periodRateBaseMultiplier",
-        "alias": "pto_period_rate_base_multiplier",
-        "type": "float",
-    },
-    # OVERTIME
     {
         "name": "OVERTIME_periodRateBaseMultiplier",
         "alias": "overtime_period_rate_base_multiplier",
@@ -340,29 +335,11 @@ central_team_time_cards_columns_list = [
         "alias": "overtime_period_rate_amount",
         "type": "float",
     },
-    # REGULAR
     {
-        "name": "REGULAR_rateBaseMultiplier",
-        "alias": "regular_rate_base_multiplier",
-        "type": "float",
+        "name": "OVERTIME_timeDuration",
+        "alias": "overtime_time_duration",
+        "type": "str",
     },
-    {
-        "name": "REGULAR_rateAmount",
-        "alias": "regular_rate_amount",
-        "type": "float",
-    },
-    # PTO
-    {
-        "name": "VAC_rateBaseMultiplier",
-        "alias": "pto_rate_base_multiplier",
-        "type": "float",
-    },
-    {
-        "name": "VAC_rateAmount",
-        "alias": "pto_rate_amount",
-        "type": "float",
-    },
-    # OVERTIME
     {
         "name": "OVERTIME_rateBaseMultiplier",
         "alias": "overtime_rate_base_multiplier",
@@ -373,7 +350,74 @@ central_team_time_cards_columns_list = [
         "alias": "overtime_rate_amount",
         "type": "float",
     },
-    # BEREAV
+    
+    # ===== VAC (Vacation/PTO) =====
+    {
+        "name": "VAC_periodTimeDuration",
+        "alias": "pto_period_time_duration",
+        "type": "str",
+    },
+    {"name": "VAC_timeDuration", "alias": "pto_time_duration", "type": "str"},
+    {
+        "name": "VAC_periodRateAmount",
+        "alias": "pto_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "VAC_periodRateBaseMultiplier",
+        "alias": "pto_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "VAC_rateBaseMultiplier",
+        "alias": "pto_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "VAC_rateAmount",
+        "alias": "pto_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== VACATION =====
+    {
+        "name": "VACATION_periodTimeDuration",
+        "alias": "vacation_period_time_duration",
+        "type": "str",
+    },
+    {"name": "VACATION_timeDuration", "alias": "vacation_time_duration", "type": "str"},
+    {
+        "name": "VACATION_periodRateAmount",
+        "alias": "vacation_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "VACATION_periodRateBaseMultiplier",
+        "alias": "vacation_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "VACATION_rateBaseMultiplier",
+        "alias": "vacation_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "VACATION_rateAmount",
+        "alias": "vacation_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== BEREAV (Bereavement) =====
+    {
+        "name": "BEREAV_periodTimeDuration",
+        "alias": "bereavement_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "BEREAV_timeDuration",
+        "alias": "bereavement_time_duration",
+        "type": "str",
+    },
     {
         "name": "BEREAV_periodRateBaseMultiplier",
         "alias": "bereavement_period_rate_base_multiplier",
@@ -394,29 +438,18 @@ central_team_time_cards_columns_list = [
         "alias": "bereavement_rate_amount",
         "type": "float",
     },
-    # VACATION
+    
+    # ===== FLA =====
     {
-        "name": "VACATION_periodRateAmount",
-        "alias": "vacation_period_rate_amount",
-        "type": "float",
+        "name": "FLA_periodTimeDuration",
+        "alias": "fla_period_time_duration",
+        "type": "str",
     },
     {
-        "name": "VACATION_periodRateBaseMultiplier",
-        "alias": "vacation_period_rate_base_multiplier",
-        "type": "float",
+        "name": "FLA_timeDuration",
+        "alias": "fla_time_duration",
+        "type": "str",
     },
-    # VACATION
-    {
-        "name": "VACATION_rateBaseMultiplier",
-        "alias": "vacation_rate_base_multiplier",
-        "type": "float",
-    },
-    {
-        "name": "VACATION_rateAmount",
-        "alias": "vacation_rate_amount",
-        "type": "float",
-    },
-    # FLA
     {
         "name": "FLA_periodRateAmount",
         "alias": "fla_period_rate_amount",
@@ -427,7 +460,6 @@ central_team_time_cards_columns_list = [
         "alias": "fla_period_rate_base_multiplier",
         "type": "float",
     },
-    # FLA
     {
         "name": "FLA_rateBaseMultiplier",
         "alias": "fla_rate_base_multiplier",
@@ -438,29 +470,8 @@ central_team_time_cards_columns_list = [
         "alias": "fla_rate_amount",
         "type": "float",
     },
-    # SIC
-    {
-        "name": "SIC_periodRateAmount",
-        "alias": "sick_period_rate_amount",
-        "type": "float",
-    },
-    {
-        "name": "SIC_periodRateBaseMultiplier",
-        "alias": "sick_period_rate_base_multiplier",
-        "type": "float",
-    },
-    # SIC
-    {
-        "name": "SIC_rateBaseMultiplier",
-        "alias": "sick_rate_base_multiplier",
-        "type": "float",
-    },
-    {
-        "name": "SIC_rateAmount",
-        "alias": "sick_rate_amount",
-        "type": "float",
-    },
-    # OFC
+    
+    # ===== OFC =====
     {
         "name": "OFC_periodTimeDuration",
         "alias": "ofc_period_time_duration",
@@ -491,6 +502,8 @@ central_team_time_cards_columns_list = [
         "alias": "ofc_rate_amount",
         "type": "float",
     },
+    
+    # ===== DATA WAREHOUSE FIELDS =====
     {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
     {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
     {
@@ -515,6 +528,590 @@ central_team_time_cards_additional_columns_list = [
     {"alias": "bereavement_time_duration_minutes", "type": "float"},
     {"alias": "fla_period_time_duration_minutes", "type": "float"},
     {"alias": "fla_time_duration_minutes", "type": "float"},
+    {"alias": "vacation_period_time_duration_minutes", "type": "float"},
+    {"alias": "vacation_time_duration_minutes", "type": "float"},
+    {"alias": "ofc_period_time_duration_minutes", "type": "float"},
+    {"alias": "ofc_time_duration_minutes", "type": "float"},
+]
+
+northeast_team_time_cards_columns_list = [
+    # ===== METADATA FIELDS =====
+    {"name": "associateOID", "alias": "associate_oid", "type": "str"},
+    {"name": "workerID", "alias": "worker_id", "type": "str"},
+    {"name": "formattedName", "alias": "formatted_name", "type": "str"},
+    {"name": "familyName", "alias": "family_name", "type": "str"},
+    {"name": "givenName", "alias": "given_name", "type": "str"},
+    {
+        "name": "processingStatusCode",
+        "alias": "processing_status_code",
+        "type": "str",
+    },
+    {"name": "periodCode", "alias": "period_code", "type": "str"},
+    {
+        "name": "periodCodeShortName",
+        "alias": "period_code_short_name",
+        "type": "str",
+    },
+    {
+        "name": "timePeriodStartDate",
+        "alias": "time_period_start_date",
+        "type": "date",
+    },
+    {
+        "name": "timePeriodEndDate",
+        "alias": "time_period_end_date",
+        "type": "date",
+    },
+    {"name": "periodStatus", "alias": "period_status", "type": "str"},
+    {"name": "entryDate", "alias": "entry_date", "type": "date"},
+    
+    # ===== REGULAR =====
+    {
+        "name": "Regular_periodTimeDuration",
+        "alias": "regular_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "Regular_timeDuration",
+        "alias": "regular_time_duration",
+        "type": "str",
+    },
+    
+    # ===== OVERTIME =====
+    {
+        "name": "Overtime_periodTimeDuration",
+        "alias": "overtime_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "Overtime_timeDuration",
+        "alias": "overtime_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "Overtime_rateBaseMultiplier",
+        "alias": "overtime_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "Overtime_rateAmount",
+        "alias": "overtime_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== NOT WORKING =====
+    {
+        "name": "Not Working_timeDuration",
+        "alias": "not_working_time_duration",
+        "type": "str",
+    },
+    
+    # ===== DATA WAREHOUSE FIELDS =====
+    {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
+    {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
+    {
+        "name": "DW_ERP_Source_Table",
+        "alias": "dw_erp_source_table",
+        "type": "str",
+    },
+    {"name": "Region_Id", "alias": "region_id", "type": "int"},
+    {"name": "id", "alias": "id", "type": "str"},
+]
+
+northeast_team_time_cards_additional_columns_list = [
+    {"alias": "regular_period_time_duration_minutes", "type": "float"},
+    {"alias": "regular_time_duration_minutes", "type": "float"},
+    {"alias": "overtime_period_time_duration_minutes", "type": "float"},
+    {"alias": "overtime_time_duration_minutes", "type": "float"},
+    {"alias": "not_working_time_duration_minutes", "type": "float"},
+]
+
+west_team_time_cards_columns_list = [
+    # ===== METADATA FIELDS =====
+    {"name": "associateOID", "alias": "associate_oid", "type": "str"},
+    {"name": "workerID", "alias": "worker_id", "type": "str"},
+    {"name": "formattedName", "alias": "formatted_name", "type": "str"},
+    {"name": "familyName", "alias": "family_name", "type": "str"},
+    {"name": "givenName", "alias": "given_name", "type": "str"},
+    {
+        "name": "processingStatusCode",
+        "alias": "processing_status_code",
+        "type": "str",
+    },
+    {"name": "periodCode", "alias": "period_code", "type": "str"},
+    {
+        "name": "periodCodeShortName",
+        "alias": "period_code_short_name",
+        "type": "str",
+    },
+    {
+        "name": "timePeriodStartDate",
+        "alias": "time_period_start_date",
+        "type": "date",
+    },
+    {
+        "name": "timePeriodEndDate",
+        "alias": "time_period_end_date",
+        "type": "date",
+    },
+    {"name": "periodStatus", "alias": "period_status", "type": "str"},
+    {"name": "entryDate", "alias": "entry_date", "type": "date"},
+    
+    # ===== REGULAR =====
+    {
+        "name": "REGULAR_periodTimeDuration",
+        "alias": "regular_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "REGULAR_periodRateBaseMultiplier",
+        "alias": "regular_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGULAR_periodRateAmount",
+        "alias": "regular_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "REGULAR_timeDuration",
+        "alias": "regular_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "REGULAR_rateBaseMultiplier",
+        "alias": "regular_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "REGULAR_rateAmount",
+        "alias": "regular_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== OVERTIME =====
+    {
+        "name": "OVERTIME_periodTimeDuration",
+        "alias": "overtime_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "OVERTIME_periodRateBaseMultiplier",
+        "alias": "overtime_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "OVERTIME_periodRateAmount",
+        "alias": "overtime_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "OVERTIME_timeDuration",
+        "alias": "overtime_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "OVERTIME_rateBaseMultiplier",
+        "alias": "overtime_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "OVERTIME_rateAmount",
+        "alias": "overtime_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== PTO =====
+    {
+        "name": "PTO_periodTimeDuration",
+        "alias": "pto_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "PTO_periodRateBaseMultiplier",
+        "alias": "pto_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "PTO_periodRateAmount",
+        "alias": "pto_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "PTO_timeDuration",
+        "alias": "pto_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "PTO_rateBaseMultiplier",
+        "alias": "pto_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "PTO_rateAmount",
+        "alias": "pto_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== HOLIDAY =====
+    {
+        "name": "HOLIDAY_periodTimeDuration",
+        "alias": "holiday_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "HOLIDAY_periodRateBaseMultiplier",
+        "alias": "holiday_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "HOLIDAY_periodRateAmount",
+        "alias": "holiday_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "HOLIDAY_timeDuration",
+        "alias": "holiday_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "HOLIDAY_rateBaseMultiplier",
+        "alias": "holiday_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "HOLIDAY_rateAmount",
+        "alias": "holiday_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== HOLWRK (Holiday Work) =====
+    {
+        "name": "HOLWRK_periodTimeDuration",
+        "alias": "holwrk_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "HOLWRK_periodRateBaseMultiplier",
+        "alias": "holwrk_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "HOLWRK_periodRateAmount",
+        "alias": "holwrk_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "HOLWRK_timeDuration",
+        "alias": "holwrk_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "HOLWRK_rateBaseMultiplier",
+        "alias": "holwrk_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "HOLWRK_rateAmount",
+        "alias": "holwrk_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== DBLTME (Double Time) =====
+    {
+        "name": "DBLTME_periodTimeDuration",
+        "alias": "dbltme_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "DBLTME_periodRateBaseMultiplier",
+        "alias": "dbltme_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "DBLTME_periodRateAmount",
+        "alias": "dbltme_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "DBLTME_timeDuration",
+        "alias": "dbltme_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "DBLTME_rateBaseMultiplier",
+        "alias": "dbltme_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "DBLTME_rateAmount",
+        "alias": "dbltme_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== EX-SERV (Extended Service) =====
+    {
+        "name": "EX- SERV_periodTimeDuration",
+        "alias": "ex_serv_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "EX- SERV_periodRateBaseMultiplier",
+        "alias": "ex_serv_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "EX- SERV_periodRateAmount",
+        "alias": "ex_serv_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "EX- SERV_timeDuration",
+        "alias": "ex_serv_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "EX- SERV_rateBaseMultiplier",
+        "alias": "ex_serv_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "EX- SERV_rateAmount",
+        "alias": "ex_serv_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== EXT-SER (Extended Service Alternate) =====
+    {
+        "name": "Ext-Ser_periodTimeDuration",
+        "alias": "ext_ser_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "Ext-Ser_periodRateBaseMultiplier",
+        "alias": "ext_ser_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "Ext-Ser_periodRateAmount",
+        "alias": "ext_ser_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "Ext-Ser_timeDuration",
+        "alias": "ext_ser_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "Ext-Ser_rateBaseMultiplier",
+        "alias": "ext_ser_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "Ext-Ser_rateAmount",
+        "alias": "ext_ser_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== BDAY (Birthday) =====
+    {
+        "name": "BDAY_periodTimeDuration",
+        "alias": "bday_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "BDAY_periodRateBaseMultiplier",
+        "alias": "bday_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "BDAY_periodRateAmount",
+        "alias": "bday_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "BDAY_timeDuration",
+        "alias": "bday_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "BDAY_rateBaseMultiplier",
+        "alias": "bday_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "BDAY_rateAmount",
+        "alias": "bday_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== BEREAV (Bereavement) =====
+    {
+        "name": "BEREAV_periodTimeDuration",
+        "alias": "bereavement_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "BEREAV_periodRateBaseMultiplier",
+        "alias": "bereavement_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "BEREAV_periodRateAmount",
+        "alias": "bereavement_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "BEREAV_timeDuration",
+        "alias": "bereavement_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "BEREAV_rateBaseMultiplier",
+        "alias": "bereavement_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "BEREAV_rateAmount",
+        "alias": "bereavement_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== SICK =====
+    {
+        "name": "SICK_periodTimeDuration",
+        "alias": "sick_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "SICK_periodRateBaseMultiplier",
+        "alias": "sick_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "SICK_periodRateAmount",
+        "alias": "sick_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "SICK_timeDuration",
+        "alias": "sick_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "SICK_rateBaseMultiplier",
+        "alias": "sick_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "SICK_rateAmount",
+        "alias": "sick_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== VACATION =====
+    {
+        "name": "VACATION_periodTimeDuration",
+        "alias": "vacation_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "VACATION_periodRateBaseMultiplier",
+        "alias": "vacation_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "VACATION_periodRateAmount",
+        "alias": "vacation_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "VACATION_timeDuration",
+        "alias": "vacation_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "VACATION_rateBaseMultiplier",
+        "alias": "vacation_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "VACATION_rateAmount",
+        "alias": "vacation_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== JURY =====
+    {
+        "name": "JURY_periodTimeDuration",
+        "alias": "jury_period_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "JURY_periodRateBaseMultiplier",
+        "alias": "jury_period_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "JURY_periodRateAmount",
+        "alias": "jury_period_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "JURY_timeDuration",
+        "alias": "jury_time_duration",
+        "type": "str",
+    },
+    {
+        "name": "JURY_rateBaseMultiplier",
+        "alias": "jury_rate_base_multiplier",
+        "type": "float",
+    },
+    {
+        "name": "JURY_rateAmount",
+        "alias": "jury_rate_amount",
+        "type": "float",
+    },
+    
+    # ===== DATA WAREHOUSE FIELDS =====
+    {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
+    {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
+    {
+        "name": "DW_ERP_Source_Table",
+        "alias": "dw_erp_source_table",
+        "type": "str",
+    },
+    {"name": "Region_Id", "alias": "region_id", "type": "int"},
+    {"name": "id", "alias": "id", "type": "str"}
+]
+
+west_team_time_cards_additional_columns_list = [
+    {"alias": "bday_period_time_duration_minutes", "type": "float"},
+    {"alias": "bday_time_duration_minutes", "type": "float"},
+    {"alias": "bereavement_period_time_duration_minutes", "type": "float"},
+    {"alias": "bereavement_time_duration_minutes", "type": "float"},
+    {"alias": "dbltme_period_time_duration_minutes", "type": "float"},
+    {"alias": "dbltme_time_duration_minutes", "type": "float"},
+    {"alias": "ex_serv_period_time_duration_minutes", "type": "float"},
+    {"alias": "ex_serv_time_duration_minutes", "type": "float"},
+    {"alias": "ext_ser_period_time_duration_minutes", "type": "float"},
+    {"alias": "ext_ser_time_duration_minutes", "type": "float"},
+    {"alias": "holiday_period_time_duration_minutes", "type": "float"},
+    {"alias": "holiday_time_duration_minutes", "type": "float"},
+    {"alias": "holwrk_period_time_duration_minutes", "type": "float"},
+    {"alias": "holwrk_time_duration_minutes", "type": "float"},
+    {"alias": "jury_period_time_duration_minutes", "type": "float"},
+    {"alias": "jury_time_duration_minutes", "type": "float"},
+    {"alias": "overtime_period_time_duration_minutes", "type": "float"},
+    {"alias": "overtime_time_duration_minutes", "type": "float"},
+    {"alias": "pto_period_time_duration_minutes", "type": "float"},
+    {"alias": "pto_time_duration_minutes", "type": "float"},
+    {"alias": "regular_period_time_duration_minutes", "type": "float"},
+    {"alias": "regular_time_duration_minutes", "type": "float"},
+    {"alias": "sick_period_time_duration_minutes", "type": "float"},
+    {"alias": "sick_time_duration_minutes", "type": "float"},
+    {"alias": "vacation_period_time_duration_minutes", "type": "float"},
+    {"alias": "vacation_time_duration_minutes", "type": "float"},
 ]
 
 central_pay_statement_details_columns = [
@@ -1781,125 +2378,131 @@ southeast_pay_statement_details_columns = [
     {"name": "id", "alias": "id", "type": "str"},
 ]
 
+workers_columns_list = [
+    {"name": "associateOID", "alias": "associate_oid", "type": "str"},
+    {"name": "workerID", "alias": "worker_id", "type": "str"},
+    {"name": "statusCode", "alias": "status_code", "type": "str"},
+    {
+        "name": "originalHireDate",
+        "alias": "original_hire_date",
+        "type": "date",
+    },
+    {
+        "name": "terminationDate",
+        "alias": "termination_date",
+        "type": "date",
+    },
+    {"name": "formattedName", "alias": "formatted_name", "type": "str"},
+    {"name": "familyName", "alias": "family_name", "type": "str"},
+    {"name": "middleName", "alias": "middle_name", "type": "str"},
+    {"name": "givenName", "alias": "given_name", "type": "str"},
+    {"name": "assignmentStatus", "alias": "assignment_status", "type": "str"},
+    {"name": "region", "alias": "region", "type": "str"},
+    {
+        "name": "assignmentStatusName",
+        "alias": "assignment_status_name",
+        "type": "str",
+    },
+    {"name": "jobCode", "alias": "job_code", "type": "str"},
+    {"name": "jobTitle", "alias": "job_title", "type": "str"},
+    {"name": "positionID", "alias": "position_id", "type": "str"},
+    {
+        "name": "supervisorAssociateOID",
+        "alias": "supervisor_associate_oid",
+        "type": "str",
+    },
+    {
+        "name": "supervisorWorkerID",
+        "alias": "supervisor_worker_id",
+        "type": "str",
+    },
+    {"name": "workerTypeCode", "alias": "worker_type_code", "type": "str"},
+    {"name": "homeWorkLocation", "alias": "home_work_location", "type": "str"},
+    {
+        "name": "serviceSupervisorAssociateOID",
+        "alias": "service_supervisor_associate_oid",
+        "type": "str",
+    },
+    {
+        "name": "workerTimeProfilePositionID",
+        "alias": "worker_time_profile_position_id",
+        "type": "str",
+    },
+    {"name": "payCycleCode", "alias": "pay_cycle_code", "type": "str"},
+    {"name": "payrollGroupCode", "alias": "payroll_group_code", "type": "str"},
+    {
+        "name": "businessUnitCodeValue",
+        "alias": "business_unit_code",
+        "type": "str",
+    },
+    {
+        "name": "businessUnitShortName",
+        "alias": "business_unit_name",
+        "type": "str",
+    },
+    {"name": "departmentCodeValue", "alias": "department_code", "type": "str"},
+    {"name": "departmentShortName", "alias": "department_name", "type": "str"},
+    {"name": "costNumberCodeValue", "alias": "cost_number_code", "type": "str"},
+    {"name": "costNumberShortName", "alias": "cost_number_name", "type": "str"},
+    {"name": "workEmail", "alias": "work_email", "type": "str"},
+    {"name": "hireDate", "alias": "hire_date", "type": "date"},
+    {"name": "actualStartDate", "alias": "actual_start_date", "type": "date"},
+    {
+        "name": "assignmentTerminationDate",
+        "alias": "assignment_termination_date",
+        "type": "date",
+    },
+    {
+        "name": "assignmentEffectiveDate",
+        "alias": "assignment_effective_date",
+        "type": "date",
+    },
+    {
+        "name": "hourlyRateAmount",
+        "alias": "hourly_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "annualRateAmount",
+        "alias": "annual_rate_amount",
+        "type": "float",
+    },
+    {
+        "name": "payPeriodRateAmount",
+        "alias": "pay_period_rate_amount",
+        "type": "float",
+    },
+    {"name": "payRateCode", "alias": "pay_rate_code", "type": "str"},
+    {
+        "name": "supervisorFormattedName",
+        "alias": "supervisor_formatted_name",
+        "type": "str",
+    },
+    {
+        "name": "supervisorPositionID",
+        "alias": "supervisor_position_id",
+        "type": "str",
+    },
+    {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
+    {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
+    {
+        "name": "DW_ERP_Source_Table",
+        "alias": "dw_erp_source_table",
+        "type": "str",
+    },
+    {"name": "Region_Id", "alias": "region_id", "type": "int"},
+    {"name": "id", "alias": "id", "type": "str"},
+]
 
 columns_mapping_dict = {
     "workers": {
         "key_columns": ["associateOID", "positionID", "supervisorWorkerID"],
-        "columns_list": [
-            {"name": "associateOID", "alias": "associate_oid", "type": "str"},
-            {"name": "workerID", "alias": "worker_id", "type": "str"},
-            {"name": "statusCode", "alias": "status_code", "type": "str"},
-            {
-                "name": "originalHireDate",
-                "alias": "original_hire_date",
-                "type": "date",
-            },
-            {
-                "name": "terminationDate",
-                "alias": "termination_date",
-                "type": "date",
-            },
-            {"name": "formattedName", "alias": "formatted_name", "type": "str"},
-            {"name": "familyName", "alias": "family_name", "type": "str"},
-            {"name": "middleName", "alias": "middle_name", "type": "str"},
-            {"name": "givenName", "alias": "given_name", "type": "str"},
-            {"name": "assignmentStatus", "alias": "assignment_status", "type": "str"},
-            {"name": "region", "alias": "region", "type": "str"},
-            {
-                "name": "assignmentStatusName",
-                "alias": "assignment_status_name",
-                "type": "str",
-            },
-            {"name": "jobCode", "alias": "job_code", "type": "str"},
-            {"name": "jobTitle", "alias": "job_title", "type": "str"},
-            {"name": "positionID", "alias": "position_id", "type": "str"},
-            {
-                "name": "supervisorAssociateOID",
-                "alias": "supervisor_associate_oid",
-                "type": "str",
-            },
-            {
-                "name": "supervisorWorkerID",
-                "alias": "supervisor_worker_id",
-                "type": "str",
-            },
-            {"name": "workerTypeCode", "alias": "worker_type_code", "type": "str"},
-            {"name": "homeWorkLocation", "alias": "home_work_location", "type": "str"},
-            {
-                "name": "serviceSupervisorAssociateOID",
-                "alias": "service_supervisor_associate_oid",
-                "type": "str",
-            },
-            {
-                "name": "workerTimeProfilePositionID",
-                "alias": "worker_time_profile_position_id",
-                "type": "str",
-            },
-            {"name": "payCycleCode", "alias": "pay_cycle_code", "type": "str"},
-            {"name": "payrollGroupCode", "alias": "payroll_group_code", "type": "str"},
-            {
-                "name": "businessUnitCodeValue",
-                "alias": "business_unit_code",
-                "type": "str",
-            },
-            {
-                "name": "businessUnitShortName",
-                "alias": "business_unit_name",
-                "type": "str",
-            },
-            {"name": "departmentCodeValue", "alias": "department_code", "type": "str"},
-            {"name": "departmentShortName", "alias": "department_name", "type": "str"},
-            {"name": "costNumberCodeValue", "alias": "cost_number_code", "type": "str"},
-            {"name": "costNumberShortName", "alias": "cost_number_name", "type": "str"},
-            {"name": "workEmail", "alias": "work_email", "type": "str"},
-            {"name": "hireDate", "alias": "hire_date", "type": "date"},
-            {"name": "actualStartDate", "alias": "actual_start_date", "type": "date"},
-            {
-                "name": "assignmentTerminationDate",
-                "alias": "assignment_termination_date",
-                "type": "date",
-            },
-            {
-                "name": "assignmentEffectiveDate",
-                "alias": "assignment_effective_date",
-                "type": "date",
-            },
-            {
-                "name": "hourlyRateAmount",
-                "alias": "hourly_rate_amount",
-                "type": "float",
-            },
-            {
-                "name": "annualRateAmount",
-                "alias": "annual_rate_amount",
-                "type": "float",
-            },
-            {
-                "name": "payPeriodRateAmount",
-                "alias": "pay_period_rate_amount",
-                "type": "float",
-            },
-            {"name": "payRateCode", "alias": "pay_rate_code", "type": "str"},
-            {
-                "name": "supervisorFormattedName",
-                "alias": "supervisor_formatted_name",
-                "type": "str",
-            },
-            {
-                "name": "supervisorPositionID",
-                "alias": "supervisor_position_id",
-                "type": "str",
-            },
-            {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
-            {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
-            {
-                "name": "DW_ERP_Source_Table",
-                "alias": "dw_erp_source_table",
-                "type": "str",
-            },
-            {"name": "Region_Id", "alias": "region_id", "type": "int"},
-            {"name": "id", "alias": "id", "type": "str"},
-        ],
+        "columns_list": workers_columns_list,
+        "additional_column_list": [],
+    },
+    "workers_snapshots": {
+        "key_columns": ["associateOID", "positionID", "supervisorWorkerID","timePeriodEndDate"],
+        "columns_list": workers_columns_list + [{"name": "timePeriodEndDate", "alias": "time_period_end_date", "type": "date"}],
         "additional_column_list": [],
     },
     "team_time_cards": {
@@ -1913,10 +2516,14 @@ columns_mapping_dict = {
         "columns_list": {
             "Central": central_team_time_cards_columns_list,
             "Southeast": southeast_team_time_cards_columns_list,
+            "Northeast": northeast_team_time_cards_columns_list,
+            "West": west_team_time_cards_columns_list,
         },
         "additional_column_list": {
             "Central": central_team_time_cards_additional_columns_list,
             "Southeast": southeast_team_time_cards_additional_columns_list,
+            "Northeast": northeast_team_time_cards_additional_columns_list,
+            "West": northeast_team_time_cards_additional_columns_list,
         },
     },
     "pay_statements": {
@@ -1970,5 +2577,42 @@ columns_mapping_dict = {
             "Southeast": southeast_pay_statement_details_columns,
         },
         "additional_column_list": {"Central": [], "Southeast": []},
+    },
+    "workers_payrates": {
+        "key_columns": ["associateOID", "timePeriodEndDate"],
+        "columns_list": [
+            {"name": "associateOID", "alias": "associate_oid", "type": "str"},
+            {
+                "name": "timePeriodEndDate",
+                "alias": "time_period_end_date",
+                "type": "date",
+            },
+            {
+                "name": "hourlyRateAmount",
+                "alias": "hourly_rate_amount",
+                "type": "float",
+            },
+            {
+                "name": "annualRateAmount",
+                "alias": "annual_rate_amount",
+                "type": "float",
+            },
+            {
+                "name": "payPeriodRateAmount",
+                "alias": "pay_period_rate_amount",
+                "type": "float",
+            },
+            {"name": "payRateCode", "alias": "pay_rate_code", "type": "str"},
+            {"name": "DW_ERP_System", "alias": "dw_erp_system", "type": "str"},
+            {"name": "DW_Timestamp", "alias": "dw_timestamp", "type": "datetime"},
+            {
+                "name": "DW_ERP_Source_Table",
+                "alias": "dw_erp_source_table",
+                "type": "str",
+            },
+            {"name": "Region_Id", "alias": "region_id", "type": "int"},
+            {"name": "id", "alias": "id", "type": "str"},
+        ],
+        "additional_column_list": [],
     },
 }

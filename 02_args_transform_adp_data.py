@@ -160,13 +160,19 @@ def transform_and_schema_assign(region, endpoint_name, df, date_time):
     return df
 
 
-regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2}
+# Regions that support the Next Gen API pay rates endpoint
+NEXTGEN_API_REGIONS = ["Northeast"]
+
+regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2, "West": 3}
+
 
 endpoints = [
     "workers",
     "team_time_cards",
     # "pay_statements",
     # "pay_statement_details",
+    # "workers_payrates",
+    "workers_snapshots",
 ]
 
 
@@ -185,6 +191,15 @@ def main():
         # for region in regions_list:
         logger.info(f"Starting for region {region_name}")
         for endpoint in endpoints:
+            # Skip workers_payrates for regions that don't support the Next Gen API
+            # if (
+            #     endpoint == "workers_payrates"
+            #     and region_name not in NEXTGEN_API_REGIONS
+            # ):
+            #     logger.info(
+            #         f"Skipping endpoint {endpoint} for region {region_name} (Next Gen API only)"
+            #     )
+            #     continue
             logger.info(f"Starting for endpoint {endpoint}")
             df = pd.read_parquet(
                 f"{base_path}/files/{region_name}_{endpoint}_{date_time.strftime('%m%d%y')}.parquet",

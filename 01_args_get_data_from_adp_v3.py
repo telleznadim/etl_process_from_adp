@@ -16,6 +16,7 @@ import pyarrow.parquet as pq
 import pyarrow as pa
 import time
 import re
+from urllib.parse import urlencode
 from modules.sql_calls.team_time_cards_max_start_date import (
     get_team_time_cards_max_start_date,
 )
@@ -128,76 +129,151 @@ def get_workers_list():
     return data
 
 
+# def fetch_all_workers(
+#     region, date_time, cert=None, key=None, top=50, pause=0.1, max_pages=10000
+# ):
+#     """
+#     Fetch all workers using $top/$skip pagination.
+#       - cert,key: paths to client cert and private key for mTLS, or None
+#       - top: page size (ADP default is 50; synchronous calls return max 50)
+#       - pause: small sleep between requests to be polite
+#     Returns: list of worker dicts
+#     """
+#     logger.info(f"Starting function")
+
+#     active_token = check_token_status(region.lower())
+#     CLIENT_CERT = config[f"{region.lower()}_adp_client_cert"]
+#     CLIENT_KEY = config[f"{region.lower()}_adp_client_key"]
+
+#     headers = {
+#         "Authorization": f"Bearer {active_token['access_token']}",
+#         "Accept": "application/json",
+#     }
+
+#     base_url = "https://accounts.adp.com/hr/v2/workers"
+#     all_workers = []
+#     skip = 0
+#     page = 0
+
+#     while True:
+#         url = f"{base_url}?$top={top}&$skip={skip}"
+#         print(f"➡️ Fetching: {url}")
+
+#         resp = requests.get(
+#             url, headers=headers, cert=(CLIENT_CERT, CLIENT_KEY), verify=True
+#         )
+
+#         if resp.status_code == 200:
+#             data = resp.json()
+#             batch = data.get("workers") or []
+#             if not batch:
+#                 print("⚠️ Empty workers array, stopping.")
+#                 break
+
+#             all_workers.extend(batch)
+
+#         elif resp.status_code == 204:
+#             print("✅ No content (204) – reached the end of records.")
+#             break
+
+#         else:
+#             print(f"❌ Unexpected status {resp.status_code}: {resp.text}")
+#             break  # stop loop on error
+
+#         page += 1
+#         skip += top
+
+#         if page >= max_pages:
+#             raise RuntimeError(
+#                 f"Reached max_pages ({max_pages}); stopping to avoid infinite loop."
+#             )
+
+#         time.sleep(pause)
+
+#     # Save JSON to file with timestamp
+#     # timestamp = datetime.now().strftime("%Y%m%d")
+#     filename = f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.json"
+
+#     with open(filename, "w", encoding="utf-8") as f:
+#         json.dump(all_workers, f, indent=4)
+
+#     print(f"📁 Workers data exported to {filename}")
+
+#     return all_workers
+
+
 def fetch_all_workers(
-    region, date_time, cert=None, key=None, top=50, pause=0.1, max_pages=10000
+    region,
+    date_time,
+    asofdate=None,
+    cert=None,
+    key=None,
+    top=50,
+    pause=0.1,
+    max_pages=10000,
 ):
     """
     Fetch all workers using $top/$skip pagination.
       - cert,key: paths to client cert and private key for mTLS, or None
       - top: page size (ADP default is 50; synchronous calls return max 50)
       - pause: small sleep between requests to be polite
+      - asofdate: optional date string in MM/DD/YYYY format (e.g. "03/12/2026")
     Returns: list of worker dicts
     """
     logger.info(f"Starting function")
-
     active_token = check_token_status(region.lower())
     CLIENT_CERT = config[f"{region.lower()}_adp_client_cert"]
     CLIENT_KEY = config[f"{region.lower()}_adp_client_key"]
-
     headers = {
         "Authorization": f"Bearer {active_token['access_token']}",
         "Accept": "application/json",
     }
-
     base_url = "https://accounts.adp.com/hr/v2/workers"
     all_workers = []
     skip = 0
     page = 0
 
-    while True:
-        url = f"{base_url}?$top={top}&$skip={skip}"
-        print(f"➡️ Fetching: {url}")
+    # Build the asOfDate query fragment once, reused on every page
+    asofdate_param = f"&asOfDate={asofdate}" if asofdate else ""
 
+    while True:
+        url = f"{base_url}?$top={top}&$skip={skip}{asofdate_param}"
+        print(f"➡️ Fetching: {url}")
         resp = requests.get(
             url, headers=headers, cert=(CLIENT_CERT, CLIENT_KEY), verify=True
         )
-
         if resp.status_code == 200:
             data = resp.json()
             batch = data.get("workers") or []
             if not batch:
                 print("⚠️ Empty workers array, stopping.")
                 break
-
             all_workers.extend(batch)
-
         elif resp.status_code == 204:
             print("✅ No content (204) – reached the end of records.")
             break
-
         else:
             print(f"❌ Unexpected status {resp.status_code}: {resp.text}")
-            break  # stop loop on error
-
+            break
         page += 1
         skip += top
-
         if page >= max_pages:
             raise RuntimeError(
                 f"Reached max_pages ({max_pages}); stopping to avoid infinite loop."
             )
-
         time.sleep(pause)
 
-    # Save JSON to file with timestamp
-    # timestamp = datetime.now().strftime("%Y%m%d")
-    filename = f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.json"
-
+    # Build filename with optional asofdate suffix
+    asofdate_suffix = (
+        f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
+        if asofdate
+        else ""
+    )
+    filename = f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.json"
+    # filename = f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.json"
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(all_workers, f, indent=4)
-
     print(f"📁 Workers data exported to {filename}")
-
     return all_workers
 
 
@@ -379,12 +455,17 @@ def extract_org_unit(org_units, target_type):
     return None, None
 
 
-def read_workers_json_file(region, date_time):
+def read_workers_json_file(region, date_time, asofdate=None):
     logger.info("Starting function")
+    asofdate_suffix = (
+        f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
+        if asofdate
+        else ""
+    )
 
     # Load JSON file
     with open(
-        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.json",
+        f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.json",
         "r",
         encoding="utf-8",
     ) as f:
@@ -579,11 +660,11 @@ def read_workers_json_file(region, date_time):
     df = add_dw_columns(df, date_time, "workers", region, "ADP")
     print(df)
     df.to_excel(
-        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.xlsx",
+        f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.xlsx",
         index=False,
     )
     df.to_parquet(
-        f"{base_path}/files/{region}_workers_{date_time.strftime('%m%d%y')}.parquet",
+        f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.parquet",
         index=False,
     )
 
@@ -851,9 +932,19 @@ def get_team_time_cards_v2(
         "Accept": "application/json",
     }
 
-    base_url = f"https://accounts.adp.com/time/v2/workers/{aoid}/team-time-cards?$expand=dayEntries&$filter=timeCards/timePeriod/startDate ge '{start_date}'"
+    params = {
+    '$expand': 'dayEntries',
+    '$filter': f"timeCards/timePeriod/startDate ge '{start_date}'",
+    'activeOnly': 'false'
+    }
 
-    url = base_url
+    base_url = f"https://accounts.adp.com/time/v2/workers/{aoid}/team-time-cards"
+    full_url = base_url + "?" + urlencode(params)
+    print(full_url)
+    
+    # base_url = f"https://accounts.adp.com/time/v2/workers/{aoid}/team-time-cards?$expand=dayEntries&$filter=timeCards/timePeriod/startDate ge '{start_date}'"
+
+    url = full_url
     all_timecards = []
 
     try:
@@ -1328,6 +1419,16 @@ def read_all_workers_payments_details_json_file(region, date_time):
     return df
 
 
+def get_pay_period_end_dates(region, date_time):
+    df_time_cards = pd.read_parquet(
+        f"{base_path}/files/{region}_team_time_cards_{date_time.strftime('%m%d%y')}.parquet"
+    )
+    unique_dates = df_time_cards["timePeriodEndDate"].unique()
+    print(f"Found {len(unique_dates)} asOfDate(s): {unique_dates}")
+    # Convert from 'YYYY-MM-DD' to 'MM/DD/YYYY' as required by ADP
+    return [datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d/%Y") for d in unique_dates]
+
+
 def select_all_workers(region, date_time):
     fetch_all_workers(region, date_time)
     read_workers_json_file(region, date_time)
@@ -1377,7 +1478,146 @@ def select_all_workers_payments_detail(region, date_time):
     read_all_workers_payments_details_json_file(region, date_time)
 
 
-regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2}
+def get_workers_snapshot(region, date_time):
+    """
+    Fetches worker pay rate data for all relevant pay period end dates and consolidates
+    them into a single deduplicated parquet and Excel file.
+
+    Workflow:
+        1. Retrieves all unique pay period end dates from the time cards parquet file.
+        2. For each asOfDate, fetches workers from ADP API and processes the JSON response.
+        3. Reads each generated parquet, tags it with its corresponding pay period date.
+        4. Concatenates all batches, selects relevant columns, and deduplicates.
+        5. Exports the final dataset as both parquet and Excel.
+
+    Args:
+        region (str): Region identifier (e.g. 'us', 'ca') used for file naming and config lookup.
+        date_time (datetime): Script execution datetime, used for file naming.
+
+    Returns:
+        None
+    """
+    # Get all unique pay period end dates from the time cards file
+    asofdates = get_pay_period_end_dates(region, date_time)
+
+    dfs_list = []
+    for asofdate in asofdates:
+        print(f"📅 Fetching workers as of {asofdate}")
+
+        # Fetch workers from ADP API for this specific asOfDate and save to JSON
+        fetch_all_workers(region, date_time, asofdate=asofdate)
+
+        # Parse the JSON and convert to parquet
+        read_workers_json_file(region, date_time, asofdate=asofdate)
+
+        # Build the parquet filename matching the naming convention from read_workers_json_file
+        asofdate_suffix = (
+            f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
+        )
+        parquet_file = f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.parquet"
+
+        # Read the parquet and tag each row with its pay period end date (YYYY-MM-DD)
+        df = pd.read_parquet(parquet_file)
+        df["timePeriodEndDate"] = datetime.strptime(asofdate, "%m/%d/%Y").strftime(
+            "%Y-%m-%d"
+        )
+        dfs_list.append(df)
+
+    # Concatenate all per-date batches into a single DataFrame
+    df_all_workers = pd.concat(dfs_list, ignore_index=True)
+
+    # Export final dataset to parquet and Excel
+    df_all_workers.to_parquet(
+        f"{base_path}/files/{region}_workers_snapshots_{date_time.strftime('%m%d%y')}.parquet",
+        index=False,
+    )
+    df_all_workers.to_excel(
+        f"{base_path}/files/{region}_workers_snapshots_{date_time.strftime('%m%d%y')}.xlsx",
+        index=False,
+    )
+
+def get_workers_payrates(region, date_time):
+    """
+    Fetches worker pay rate data for all relevant pay period end dates and consolidates
+    them into a single deduplicated parquet and Excel file.
+
+    Workflow:
+        1. Retrieves all unique pay period end dates from the time cards parquet file.
+        2. For each asOfDate, fetches workers from ADP API and processes the JSON response.
+        3. Reads each generated parquet, tags it with its corresponding pay period date.
+        4. Concatenates all batches, selects relevant columns, and deduplicates.
+        5. Exports the final dataset as both parquet and Excel.
+
+    Args:
+        region (str): Region identifier (e.g. 'us', 'ca') used for file naming and config lookup.
+        date_time (datetime): Script execution datetime, used for file naming.
+
+    Returns:
+        None
+    """
+    # Get all unique pay period end dates from the time cards file
+    asofdates = get_pay_period_end_dates(region, date_time)
+
+    dfs_list = []
+    for asofdate in asofdates:
+        print(f"📅 Fetching workers as of {asofdate}")
+
+        # Fetch workers from ADP API for this specific asOfDate and save to JSON
+        fetch_all_workers(region, date_time, asofdate=asofdate)
+
+        # Parse the JSON and convert to parquet
+        read_workers_json_file(region, date_time, asofdate=asofdate)
+
+        # Build the parquet filename matching the naming convention from read_workers_json_file
+        asofdate_suffix = (
+            f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
+        )
+        parquet_file = f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.parquet"
+
+        # Read the parquet and tag each row with its pay period end date (YYYY-MM-DD)
+        df = pd.read_parquet(parquet_file)
+        df["timePeriodEndDate"] = datetime.strptime(asofdate, "%m/%d/%Y").strftime(
+            "%Y-%m-%d"
+        )
+        dfs_list.append(df)
+
+    # Concatenate all per-date batches into a single DataFrame
+    df_all_workers = pd.concat(dfs_list, ignore_index=True)
+
+    # Keep only relevant pay rate columns and remove duplicates
+    dedup_cols = [
+        "associateOID",
+        "timePeriodEndDate",
+        "hourlyRateAmount",
+        "annualRateAmount",
+        "payPeriodRateAmount",
+        "payRateCode",
+    ]
+    df_all_workers = df_all_workers[dedup_cols].drop_duplicates()
+
+    # Append data warehouse metadata columns
+    df_all_workers = add_dw_columns(
+        df_all_workers, date_time, "workers_payrates", region, "ADP"
+    )
+
+    # Debug output
+    print(f"✅ After dedup: {len(df_all_workers)} worker records remaining.")
+    print(df_all_workers)
+    print(df_all_workers.columns)
+
+    # Export final dataset to parquet and Excel
+    df_all_workers.to_parquet(
+        f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.parquet",
+        index=False,
+    )
+    df_all_workers.to_excel(
+        f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.xlsx",
+        index=False,
+    )
+
+
+NEXTGEN_API_REGIONS = ["Northeast"]
+regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2, "West": 3}
 
 
 def main():
@@ -1400,41 +1640,75 @@ def main():
         select_all_workers(region_name, date_time)
 
         # Step 2 Select Period times
-        # two_weeks_before = "2026-02-01"
+        # two_weeks_before = "2026-01-01"
         start_date = get_team_time_cards_max_start_date(region_id)
         two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
+        
+        
+        # Regions that support the Next Gen API pay rates endpoint
 
-        # aoid = 'G3DQE7YYDMVA0VTW'
-        # filename = (
-        #     f"{base_path}/files/{region_name}_{aoid}_time_cards_{date_time.strftime('%m%d%y')}.json"
-        # )
+        # Step 3 Select wrokers snapshot
+        get_workers_snapshot(region_name, date_time)
 
-        #     # Load JSON file
-        # with open(
-        #     filename,
-        #     "r",
-        #     encoding="utf-8",
-        # ) as f:
-        #     json_team_time_cards = json.load(f)
+        # Regions that support the Next Gen API pay rates endpoint
 
-        # df_team_time_cards = extract_time_cards_from_json_by_day_from_file(
-        #                 json_team_time_cards
-        #             )
+        # Step 3.1 Select all Pay Rates (Only for Next Gen API)
+        # if region_name in NEXTGEN_API_REGIONS:
+        # get_workers_payrates(region_name, date_time)
 
-        # print(df_team_time_cards)
-        # print(df_team_time_cards.columns)
-        # df_team_time_cards.to_excel("files/test/df_team_time_cards.xlsx", index=False)
-
-        # # Step 3 Select Payments (5 last Payments)
+        # # Step 4 Select Payments (5 last Payments)
         # select_all_workers_payments_list(region_name, date_time)
         # select_all_workers_payments_detail(region_name, date_time)
     else:
         print("Testing")
-        region = "Southeast"
+        region = "Central"
         # fetch_all_workers(region, date_time)
         # read_workers_json_file(region, date_time)
-        fetch_worker_additional_payments(region, date_time)
+        # fetch_worker_additional_payments(region, date_time)
+        # fetch_all_workers(region, date_time, "03/12/2026")
+        get_workers_payrates(region, date_time)
+        # asofdates = get_pay_period_end_dates(region, date_time)
+        # dfs_list = []
+        # for asofdate in asofdates:
+        #     print(f"📅 Fetching workers as of {asofdate}")
+        #     # fetch_all_workers(region, date_time, asofdate=asofdate)
+        #     # read_workers_json_file(region, date_time, asofdate=asofdate)
+        #     asofdate_suffix = (
+        #         f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
+        #     )
+        #     parquet_file = f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.parquet"
+        #     df = pd.read_parquet(parquet_file)
+        #     df["timePeriodEndDate"] = datetime.strptime(asofdate, "%m/%d/%Y").strftime(
+        #         "%Y-%m-%d"
+        #     )
+        #     dfs_list.append(df)
+        # df_all_workers = pd.concat(dfs_list, ignore_index=True)
+
+        # dedup_cols = [
+        #     "associateOID",
+        #     "timePeriodEndDate",
+        #     "hourlyRateAmount",
+        #     "annualRateAmount",
+        #     "payPeriodRateAmount",
+        #     "payRateCode",
+        # ]
+        # df_all_workers = df_all_workers[dedup_cols].drop_duplicates()
+        # df_all_workers = add_dw_columns(
+        #     df_all_workers, date_time, "workers_payrates", region, "ADP"
+        # )
+        # print(f"✅ After dedup: {len(df_all_workers)} worker records remaining.")
+
+        # print(df_all_workers)
+        # print(df_all_workers.columns)
+        # df_all_workers.to_parquet(
+        #     f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.parquet",
+        #     index=False,
+        # )
+        # df_all_workers.to_excel(
+        #     f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.xlsx",
+        #     index=False,
+        # )
 
     # supervisorAssociateOID = "G38SZJG1SNT1VQP1"
     # start_date = "2026-01-01"

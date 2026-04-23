@@ -421,19 +421,6 @@ def prepare_df_from_parquet_v2(df, endpoint_name):
     return df
 
 
-regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2}
-
-endpoints = [
-    {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
-    {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
-    # {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"},
-    # {
-    #     "endpoint_name": "pay_statement_details",
-    #     "sql_table_name": "evi_adp_pay_statement_details",
-    # },
-]
-
-
 def execute_stage_table_truncate_insert(region, sql_table_stg_name, df):
     sql_procedure_truncate(sql_table_stg_name)
     sql_procedure_insert(df, sql_table_stg_name, region)
@@ -443,6 +430,26 @@ def clean_numeric(val):
     if val in ("", None, "None", "nan", "NaN"):
         return None
     return val
+
+
+# Regions that support the Next Gen API pay rates endpoint
+NEXTGEN_API_REGIONS = ["Northeast"]
+
+regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2, "West": 3}
+
+
+endpoints = [
+    {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
+    {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
+    # {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"},
+    # {
+    #     "endpoint_name": "pay_statement_details",
+    #     "sql_table_name": "evi_adp_pay_statement_details",
+    # },
+    # {"endpoint_name": "workers_payrates", "sql_table_name": "evi_adp_workers_payrates"},
+    {"endpoint_name": "workers_snapshots", "sql_table_name": "evi_adp_workers_snapshots"},
+    
+]
 
 
 def main():
@@ -463,6 +470,15 @@ def main():
 
         for endpoint_data in endpoints:
             endpoint_name = endpoint_data["endpoint_name"]
+            # Skip workers_payrates for regions that don't support the Next Gen API
+            if (
+                endpoint_name == "workers_payrates"
+                and region_name not in NEXTGEN_API_REGIONS
+            ):
+                logger.info(
+                    f"Skipping endpoint_name {endpoint_name} for region {region_name} (Next Gen API only)"
+                )
+                continue
             sql_table = endpoint_data["sql_table_name"]
             logger.info(
                 f"Starting for endpoint {endpoint_name}, sql_table: {sql_table}"
