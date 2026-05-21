@@ -447,8 +447,10 @@ endpoints = [
     #     "sql_table_name": "evi_adp_pay_statement_details",
     # },
     # {"endpoint_name": "workers_payrates", "sql_table_name": "evi_adp_workers_payrates"},
-    {"endpoint_name": "workers_snapshots", "sql_table_name": "evi_adp_workers_snapshots"},
-    
+    {
+        "endpoint_name": "workers_snapshots",
+        "sql_table_name": "evi_adp_workers_snapshots",
+    },
 ]
 
 

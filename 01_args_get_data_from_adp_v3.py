@@ -931,17 +931,25 @@ def get_team_time_cards_v2(
         "Authorization": f"Bearer {active_token['access_token']}",
         "Accept": "application/json",
     }
-
-    params = {
-    '$expand': 'dayEntries',
-    '$filter': f"timeCards/timePeriod/startDate ge '{start_date}'",
-    'activeOnly': 'false'
-    }
+    if region == "Northeast":
+        params = {
+            "$expand": "dayEntries",
+            # '$filter': f"timeCards/timePeriod/startDate ge '{start_date}'",
+            "$filter": f"timeCards/periodCode/codeValue eq current",
+            # "$filter": f"timeCards/periodCode/codeValue eq previous",
+            "activeOnly": "false",
+        }
+    else:
+        params = {
+            "$expand": "dayEntries",
+            "$filter": f"timeCards/timePeriod/startDate ge '{start_date}'",
+            "activeOnly": "false",
+        }
 
     base_url = f"https://accounts.adp.com/time/v2/workers/{aoid}/team-time-cards"
     full_url = base_url + "?" + urlencode(params)
     print(full_url)
-    
+
     # base_url = f"https://accounts.adp.com/time/v2/workers/{aoid}/team-time-cards?$expand=dayEntries&$filter=timeCards/timePeriod/startDate ge '{start_date}'"
 
     url = full_url
@@ -1536,6 +1544,7 @@ def get_workers_snapshot(region, date_time):
         index=False,
     )
 
+
 def get_workers_payrates(region, date_time):
     """
     Fetches worker pay rate data for all relevant pay period end dates and consolidates
@@ -1644,8 +1653,7 @@ def main():
         start_date = get_team_time_cards_max_start_date(region_id)
         two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
-        
-        
+
         # Regions that support the Next Gen API pay rates endpoint
 
         # Step 3 Select wrokers snapshot
@@ -1658,8 +1666,9 @@ def main():
         # get_workers_payrates(region_name, date_time)
 
         # # Step 4 Select Payments (5 last Payments)
-        # select_all_workers_payments_list(region_name, date_time)
-        # select_all_workers_payments_detail(region_name, date_time)
+        if region_name in ["Central"]:
+            select_all_workers_payments_list(region_name, date_time)
+            select_all_workers_payments_detail(region_name, date_time)
     else:
         print("Testing")
         region = "Central"
