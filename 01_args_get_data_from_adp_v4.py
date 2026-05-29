@@ -921,7 +921,11 @@ def get_team_time_cards(
 
 
 def get_team_time_cards_v2(
-    region, date_time, aoid="G3VV32149FAZE2C0", start_date="2025-07-01", period_code="current"
+    region,
+    date_time,
+    aoid="G3VV32149FAZE2C0",
+    start_date="2025-07-01",
+    period_code="current",
 ):
     active_token = check_token_status(region.lower())
     CLIENT_CERT = config[f"{region.lower()}_adp_client_cert"]
@@ -1226,22 +1230,34 @@ def select_all_period_times(region, date_time, start_date="2025-08-15"):
     )
     print(df_all_workers)
     all_team_time_cards_dfs = []
-    
+
     # Northeast uses period code filter instead of date range — run for both periods
-    northeast_period_codes = ["current", "previous"] if region == "Northeast" else [None]
+    northeast_period_codes = (
+        ["current", "previous"] if region == "Northeast" else [None]
+    )
     for period_code in northeast_period_codes:
-        logger.info(f"Fetching period_code={period_code}" if period_code else "Fetching by start_date")
+        logger.info(
+            f"Fetching period_code={period_code}"
+            if period_code
+            else "Fetching by start_date"
+        )
         for supervisorAssociateOID in df_all_workers["supervisorAssociateOID"].unique():
             # for supervisorAssociateOID in ["G3CK8PRN7AMFCPDN"]:
             if supervisorAssociateOID != None:
                 print(supervisorAssociateOID)
                 json_team_time_cards = get_team_time_cards_v2(
-                    region, date_time, supervisorAssociateOID, start_date, period_code=period_code if period_code else "current"
+                    region,
+                    date_time,
+                    supervisorAssociateOID,
+                    start_date,
+                    period_code=period_code if period_code else "current",
                 )
                 if json_team_time_cards != []:
                     if len(json_team_time_cards["teamTimeCards"]) > 0:
-                        df_team_time_cards = extract_time_cards_from_json_by_day_from_file(
-                            json_team_time_cards
+                        df_team_time_cards = (
+                            extract_time_cards_from_json_by_day_from_file(
+                                json_team_time_cards
+                            )
                         )
                         all_team_time_cards_dfs.append(df_team_time_cards)
 
