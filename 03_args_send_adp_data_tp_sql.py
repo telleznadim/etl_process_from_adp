@@ -328,6 +328,38 @@ def sql_merge_staging_into_silver_auto(silver_table, staging_table, join_keys):
     return stats
 
 
+def delete_team_time_cards_periods(silver_table, staging_table, region_id):
+    """
+    Deletes all rows from the silver table for every time_period_end_date + region_id
+    combination present in the staging table. Called before inserting fresh data
+    to ensure entries deleted or corrected in ADP do not persist as orphan rows.
+    """
+    conn = create_sql_connection()
+    sql = f"""
+        DELETE t
+        FROM dbo.{silver_table} t
+        INNER JOIN (
+            SELECT DISTINCT time_period_end_date
+            FROM dbo.{staging_table}
+            WHERE region_id = {region_id}
+        ) s ON t.time_period_end_date = s.time_period_end_date
+           AND t.region_id = {region_id}
+    """
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    deleted = cursor.rowcount
+    conn.commit()
+    cursor.close()
+    print(
+        f"  Deleted {deleted:,} rows from {silver_table} for region_id={region_id} before period refresh"
+    )
+    logger.debug(
+        f"  Deleted {deleted:,} rows from {silver_table} for region_id={region_id} before period refresh"
+    )
+    conn.close()
+    return deleted
+
+
 def prepare_df_from_parquet(df, endpoint_name, region):
     logger.info(f"Starting function")
     schema = columns_mapping_dict[endpoint_name]
@@ -439,8 +471,8 @@ regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2, "West": 3}
 
 
 endpoints = [
-    {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
-    {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
+    # {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
+    # {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
     # {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"},
     # {
     #     "endpoint_name": "pay_statement_details",
@@ -502,6 +534,12 @@ def main():
                     execute_stage_table_truncate_insert(
                         region_name, sql_table_stg_name, df
                     )
+
+                    if endpoint_name == "team_time_cards":
+                        print(endpoint_name)
+                        delete_team_time_cards_periods(
+                            silver_sql_table_name, sql_table_stg_name, region_id
+                        )
                     sql_merge_staging_into_silver_auto(
                         silver_sql_table_name, sql_table_stg_name, sql_key_columns
                     )

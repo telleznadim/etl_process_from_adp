@@ -167,8 +167,8 @@ regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2, "West": 3}
 
 
 endpoints = [
-    "workers",
-    "team_time_cards",
+    # "workers",
+    # "team_time_cards",
     # "pay_statements",
     # "pay_statement_details",
     # "workers_payrates",

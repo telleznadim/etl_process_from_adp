@@ -1566,6 +1566,66 @@ def get_workers_snapshot(region, date_time):
     )
 
 
+def get_workers_snapshot_for_periods(region, date_time, period_end_dates):
+    """
+    Fetches worker pay rate data for an EXPLICIT list of pay period end dates
+    and consolidates them into a single deduplicated parquet and Excel file.
+
+    Same workflow as get_workers_snapshot(), except the list of asOfDates to
+    fetch is passed in directly instead of being derived from the time cards
+    file via get_pay_period_end_dates(). Useful for backfilling/refreshing
+    specific periods - e.g. periods where a worker was found to be missing
+    from the snapshot table.
+
+    Args:
+        region (str): Region identifier (e.g. 'us', 'ca') used for file naming and config lookup.
+        date_time (datetime): Script execution datetime, used for file naming.
+        period_end_dates (list[str]): Pay period end dates to fetch, in 'YYYY-MM-DD'
+            format (e.g. ["2026-03-21", "2026-04-04", "2026-04-18"]).
+
+    Returns:
+        None
+    """
+    # Convert from 'YYYY-MM-DD' to 'MM/DD/YYYY' as required by ADP
+    asofdates = [
+        datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d/%Y") for d in period_end_dates
+    ]
+    print(f"Fetching workers for {len(asofdates)} asOfDate(s): {asofdates}")
+
+    dfs_list = []
+    for asofdate in asofdates:
+        print(f"📅 Fetching workers as of {asofdate}")
+        # Fetch workers from ADP API for this specific asOfDate and save to JSON
+        fetch_all_workers(region, date_time, asofdate=asofdate)
+        # Parse the JSON and convert to parquet
+        read_workers_json_file(region, date_time, asofdate=asofdate)
+        # Build the parquet filename matching the naming convention from read_workers_json_file
+        asofdate_suffix = (
+            f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
+        )
+        parquet_file = f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.parquet"
+        # Read the parquet and tag each row with its pay period end date (YYYY-MM-DD)
+        df = pd.read_parquet(parquet_file)
+        df["timePeriodEndDate"] = datetime.strptime(asofdate, "%m/%d/%Y").strftime(
+            "%Y-%m-%d"
+        )
+        dfs_list.append(df)
+
+    # Concatenate all per-date batches into a single DataFrame
+    df_all_workers = pd.concat(dfs_list, ignore_index=True)
+
+    # Export to parquet and Excel - "_backfill_" suffix so this never
+    # overwrites the regular daily get_workers_snapshot() output
+    df_all_workers.to_parquet(
+        f"{base_path}/files/{region}_workers_snapshots_{date_time.strftime('%m%d%y')}.parquet",
+        index=False,
+    )
+    df_all_workers.to_excel(
+        f"{base_path}/files/{region}_workers_snapshots_{date_time.strftime('%m%d%y')}.xlsx",
+        index=False,
+    )
+
+
 def get_workers_payrates(region, date_time):
     """
     Fetches worker pay rate data for all relevant pay period end dates and consolidates
@@ -1670,9 +1730,9 @@ def main():
         select_all_workers(region_name, date_time)
 
         # Step 2 Select Period times
-        # two_weeks_before = "2026-01-01"
-        start_date = get_team_time_cards_max_start_date(region_id)
-        two_weeks_before = start_date - timedelta(days=14)
+        two_weeks_before = "2026-01-25"
+        # start_date = get_team_time_cards_max_start_date(region_id)
+        # two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
 
         # Regions that support the Next Gen API pay rates endpoint
@@ -1687,58 +1747,97 @@ def main():
         # get_workers_payrates(region_name, date_time)
 
         # # Step 4 Select Payments (5 last Payments)
-        if region_name in ["Central"]:
-            select_all_workers_payments_list(region_name, date_time)
-            select_all_workers_payments_detail(region_name, date_time)
+        # if region_name in ["Central"]:
+        #     select_all_workers_payments_list(region_name, date_time)
+        #     select_all_workers_payments_detail(region_name, date_time)
     else:
         print("Testing")
         region = "Central"
-        # fetch_all_workers(region, date_time)
-        # read_workers_json_file(region, date_time)
-        # fetch_worker_additional_payments(region, date_time)
-        # fetch_all_workers(region, date_time, "03/12/2026")
-        get_workers_payrates(region, date_time)
-        # asofdates = get_pay_period_end_dates(region, date_time)
-        # dfs_list = []
-        # for asofdate in asofdates:
-        #     print(f"📅 Fetching workers as of {asofdate}")
-        #     # fetch_all_workers(region, date_time, asofdate=asofdate)
-        #     # read_workers_json_file(region, date_time, asofdate=asofdate)
-        #     asofdate_suffix = (
-        #         f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
-        #     )
-        #     parquet_file = f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.parquet"
-        #     df = pd.read_parquet(parquet_file)
-        #     df["timePeriodEndDate"] = datetime.strptime(asofdate, "%m/%d/%Y").strftime(
-        #         "%Y-%m-%d"
-        #     )
-        #     dfs_list.append(df)
-        # df_all_workers = pd.concat(dfs_list, ignore_index=True)
+        # Example call for the remaining Larry Cox periods (Feb 7 / Feb 21 / Mar 7
 
-        # dedup_cols = [
-        #     "associateOID",
-        #     "timePeriodEndDate",
-        #     "hourlyRateAmount",
-        #     "annualRateAmount",
-        #     "payPeriodRateAmount",
-        #     "payRateCode",
+        # already done - these are the other 9 still missing):
+        # LARRY_COX_REMAINING_PERIODS = [
+        #     "2026-03-21",
+        #     "2026-04-04",
+        #     "2026-04-18",
+        #     "2026-05-02",
+        #     "2026-05-16",
+        #     "2026-05-30",
+        #     "2026-06-13",
+        #     "2026-06-27",
+        #     "2026-07-11",
         # ]
-        # df_all_workers = df_all_workers[dedup_cols].drop_duplicates()
-        # df_all_workers = add_dw_columns(
-        #     df_all_workers, date_time, "workers_payrates", region, "ADP"
-        # )
-        # print(f"✅ After dedup: {len(df_all_workers)} worker records remaining.")
 
-        # print(df_all_workers)
-        # print(df_all_workers.columns)
-        # df_all_workers.to_parquet(
-        #     f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.parquet",
-        #     index=False,
+        # get_workers_snapshot_for_periods(
+        #     "Central", date_time, LARRY_COX_REMAINING_PERIODS
         # )
-        # df_all_workers.to_excel(
-        #     f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.xlsx",
-        #     index=False,
-        # )
+        SOUTHEAST_ALL_PERIODS = [
+            "2026-01-02",
+            "2026-01-16",
+            "2026-01-30",
+            "2026-02-13",
+            "2026-02-27",
+            "2026-03-13",
+            "2026-03-27",
+            "2026-04-10",
+            "2026-04-24",
+            "2026-05-08",
+            "2026-05-22",
+            "2026-06-05",
+            "2026-06-19",
+            "2026-07-03",
+            "2026-07-17",
+            "2026-07-31",
+            "2026-08-14",
+        ]
+
+        get_workers_snapshot_for_periods("Southeast", date_time, SOUTHEAST_ALL_PERIODS)
+    # fetch_all_workers(region, date_time)
+    # read_workers_json_file(region, date_time)
+    # fetch_worker_additional_payments(region, date_time)
+    # fetch_all_workers(region, date_time, "03/12/2026")
+    # get_workers_payrates(region, date_time)
+    # asofdates = get_pay_period_end_dates(region, date_time)
+    # dfs_list = []
+    # for asofdate in asofdates:
+    #     print(f"📅 Fetching workers as of {asofdate}")
+    #     # fetch_all_workers(region, date_time, asofdate=asofdate)
+    #     # read_workers_json_file(region, date_time, asofdate=asofdate)
+    #     asofdate_suffix = (
+    #         f"_asof_{datetime.strptime(asofdate, '%m/%d/%Y').strftime('%m%d%y')}"
+    #     )
+    #     parquet_file = f"{base_path}/files/{region}_workers{asofdate_suffix}_{date_time.strftime('%m%d%y')}.parquet"
+    #     df = pd.read_parquet(parquet_file)
+    #     df["timePeriodEndDate"] = datetime.strptime(asofdate, "%m/%d/%Y").strftime(
+    #         "%Y-%m-%d"
+    #     )
+    #     dfs_list.append(df)
+    # df_all_workers = pd.concat(dfs_list, ignore_index=True)
+
+    # dedup_cols = [
+    #     "associateOID",
+    #     "timePeriodEndDate",
+    #     "hourlyRateAmount",
+    #     "annualRateAmount",
+    #     "payPeriodRateAmount",
+    #     "payRateCode",
+    # ]
+    # df_all_workers = df_all_workers[dedup_cols].drop_duplicates()
+    # df_all_workers = add_dw_columns(
+    #     df_all_workers, date_time, "workers_payrates", region, "ADP"
+    # )
+    # print(f"✅ After dedup: {len(df_all_workers)} worker records remaining.")
+
+    # print(df_all_workers)
+    # print(df_all_workers.columns)
+    # df_all_workers.to_parquet(
+    #     f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.parquet",
+    #     index=False,
+    # )
+    # df_all_workers.to_excel(
+    #     f"{base_path}/files/{region}_workers_payrates_{date_time.strftime('%m%d%y')}.xlsx",
+    #     index=False,
+    # )
 
     # supervisorAssociateOID = "G38SZJG1SNT1VQP1"
     # start_date = "2026-01-01"

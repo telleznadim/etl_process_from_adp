@@ -1,44 +1,42 @@
 from dotenv import dotenv_values
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 
 config = dotenv_values(
-    "C:/Users/eviadmin/Documents/Datawarehouse/test_schedule_scripts/From_BC/python/.env")
+    "C:/Users/eviadmin/Documents/Datawarehouse/test_schedule_scripts/From_BC/python/.env"
+)
 
-# Replace these with your Office 365 email credentials
 
+def send_email(
+    subject,
+    body,
+    to_emails=["ntellez@evi-ind.com"],
+    api_key=config["smtp2go_api_key"],
+    sender=config["email_user"],
+):
+    """
+    Sends an email via the SMTP2GO API (replaces the old Office 365
+    SMTP basic-auth flow, which Microsoft now rejects with a 535 error).
+    """
+    url = "https://api.smtp2go.com/v3/email/send"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Smtp2go-Api-Key": api_key,
+        "accept": "application/json",
+    }
+    payload = {
+        "sender": sender,
+        "to": to_emails,
+        "subject": subject,
+        "text_body": body,
+    }
 
-def send_email(subject, body, to_emails=["ntellez@evi-ind.com"], email_user=config["email_user"], email_pass=config["email_pass"]):
-    # Set up the MIME
-    message = MIMEMultipart()
-    message["From"] = email_user
-    message["To"] = ", ".join(to_emails)
-    message["Subject"] = subject
-
-    # Attach the body of the email
-    message.attach(MIMEText(body, "plain"))
-
-    # Connect to the SMTP server for Office 365
-    smtp_server = "smtp.office365.com"
-    port = 587  # StartTLS port
-
-    context = ssl.create_default_context()
-
-    # Create an SMTP session
-    with smtplib.SMTP(smtp_server, port) as server:
-        server.starttls(context=context)
-        server.login(email_user, email_pass)
-        server.sendmail(email_user, to_emails, message.as_string())
+    response = requests.post(url, json=payload, headers=headers, timeout=15)
+    response.raise_for_status()  # raises an exception on 4xx/5xx
+    return response.json()
 
 
 if __name__ == "__main__":
-    # Replace these with your Office 365 email credentials
-    email_user = config["email_user"]
-    email_pass = config["email_pass"]
-
     email_subject = "Test Email from Python"
-    email_body = "This is a test email sent from Python using Office 365."
-
-    send_email(email_subject, email_body)
+    email_body = "This is a test email sent via SMTP2GO API."
+    result = send_email(email_subject, email_body)
+    print(result)
