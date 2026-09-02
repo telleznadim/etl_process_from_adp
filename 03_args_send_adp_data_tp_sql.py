@@ -438,11 +438,13 @@ def prepare_df_from_parquet_v2(df, endpoint_name):
         # BOOL → BIT
         elif col_type == "bool":
             df[col] = df[col].map(
-                lambda x: 1
-                if x in [True, "true", "True", 1]
-                else 0
-                if x in [False, "false", "False", 0]
-                else None
+                lambda x: (
+                    1
+                    if x in [True, "true", "True", 1]
+                    else 0
+                    if x in [False, "false", "False", 0]
+                    else None
+                )
             )
 
         # STRING
@@ -471,8 +473,8 @@ regions_list = {"Southeast": 1, "Central": 7, "Northeast": 2, "West": 3}
 
 
 endpoints = [
-    # {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
-    # {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
+    {"endpoint_name": "workers", "sql_table_name": "evi_adp_workers"},
+    {"endpoint_name": "team_time_cards", "sql_table_name": "evi_adp_team_time_cards"},
     # {"endpoint_name": "pay_statements", "sql_table_name": "evi_adp_pay_statements"},
     # {
     #     "endpoint_name": "pay_statement_details",

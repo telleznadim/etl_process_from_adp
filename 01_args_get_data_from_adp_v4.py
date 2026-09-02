@@ -1730,9 +1730,9 @@ def main():
         select_all_workers(region_name, date_time)
 
         # Step 2 Select Period times
-        two_weeks_before = "2026-01-25"
-        # start_date = get_team_time_cards_max_start_date(region_id)
-        # two_weeks_before = start_date - timedelta(days=14)
+        # two_weeks_before = "2026-01-25"
+        start_date = get_team_time_cards_max_start_date(region_id)
+        two_weeks_before = start_date - timedelta(days=14)
         select_all_period_times(region_name, date_time, two_weeks_before)
 
         # Regions that support the Next Gen API pay rates endpoint
